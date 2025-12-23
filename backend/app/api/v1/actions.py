@@ -101,18 +101,23 @@ def get_game_state(game_id: int) -> Dict[str, Any]:
 
     # Essayer de récupérer l'état depuis la base de données
     saved_state = GameStateModel.get_latest(game_id)
+    print(f"[DEBUG] get_game_state pour game_id {game_id}: saved_state trouvé = {saved_state is not None}")
 
     if saved_state and saved_state.get("state_data"):
         # Normaliser les clés de players (convertir strings en int si nécessaire)
         state = saved_state["state_data"]
+        print(f"[DEBUG] État récupéré depuis DB, status: {state.get('status')}, turn: {state.get('turn_number')}")
+        
         if "players" in state and state["players"]:
             # Vérifier si les clés sont des strings et les convertir en int
-            first_key = next(iter(state["players"].keys()))
-            if isinstance(first_key, str) and first_key.isdigit():
-                normalized_players = {}
-                for key, value in state["players"].items():
-                    normalized_players[int(key)] = value
-                state["players"] = normalized_players
+            if len(state["players"]) > 0:
+                first_key = next(iter(state["players"].keys()))
+                if isinstance(first_key, str) and first_key.isdigit():
+                    normalized_players = {}
+                    for key, value in state["players"].items():
+                        normalized_players[int(key)] = value
+                    state["players"] = normalized_players
+        print(f"[DEBUG] État retourné avec {len(state.get('players', {}))} joueurs")
         return state
 
     # Si aucun état n'existe mais la partie est démarrée, initialiser
@@ -300,7 +305,7 @@ async def play_color_action(
             (r for r in player_state["rangers"] if r["color"] == "orange"), None
         )
         is_improved = orange_ranger.get("improved", False) if orange_ranger else False
-        
+
         # Initialiser les données du tour de construction
         player_state["construction_turn_data"] = {
             "action_power": action.power,
@@ -621,7 +626,7 @@ async def get_construction_tiles(
 
     # Récupérer les tuiles disponibles (taille <= max_size)
     available_tiles = GameLogic.get_available_construction_tiles(max_size)
-    
+
     return {
         "success": True,
         "tiles": available_tiles,
@@ -651,7 +656,7 @@ async def place_construction(
     game_state = get_game_state(game_id)
     player_num = player["player_number"]
     player_state = game_state["players"].get(player_num)
-    
+
     if not player_state:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -672,25 +677,27 @@ async def place_construction(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Vous devez d'abord jouer l'action Construction",
         )
-    
+
     action_power = construction_data["action_power"]
     is_improved = construction_data.get("is_improved", False)
     constructions_placed = construction_data.get("constructions_placed", [])
     total_size_used = construction_data.get("total_size_used", 0)
-    
+
     # Récupérer la tuile choisie
     available_tiles = GameLogic.get_available_construction_tiles(action_power)
-    selected_tile = next((t for t in available_tiles if t["id"] == placement.tile_id), None)
-    
+    selected_tile = next(
+        (t for t in available_tiles if t["id"] == placement.tile_id), None
+    )
+
     if not selected_tile:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Tuile non trouvée ou non disponible",
         )
-    
+
     # Vérifier les contraintes selon si le Ranger est amélioré
     tile_size = selected_tile["size"]
-    
+
     if is_improved:
         # Ranger amélioré : plusieurs tuiles possibles
         # Vérifier qu'on ne dépasse pas le total de taille
@@ -699,7 +706,7 @@ async def place_construction(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Total des tailles dépassé (utilisé: {total_size_used}, ajout: {tile_size}, max: {action_power})",
             )
-        
+
         # Vérifier qu'on ne construit pas deux tuiles de même taille
         if tile_size in constructions_placed:
             raise HTTPException(
@@ -713,7 +720,7 @@ async def place_construction(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Ranger non amélioré : vous ne pouvez construire qu'une seule tuile par tour",
             )
-        
+
         # Vérifier que la taille ne dépasse pas le niveau
         if tile_size > action_power:
             raise HTTPException(
@@ -723,8 +730,7 @@ async def place_construction(
 
     # Appliquer la rotation à la tuile
     rotated_hexagons = GameLogic.rotate_tile_hexagons(
-        selected_tile["hexagons"],
-        placement.rotation
+        selected_tile["hexagons"], placement.rotation
     )
 
     # Valider le placement
@@ -732,15 +738,15 @@ async def place_construction(
     grid = board.get("grid", {})
     grid_hexagons = grid.get("hexagons", [])
     existing_garnisons = board.get("garnisons", [])
-    
+
     is_valid, error_message = GameLogic.validate_tile_placement(
         grid_hexagons,
         rotated_hexagons,
         placement.anchor_q,
         placement.anchor_r,
-        existing_garnisons
+        existing_garnisons,
     )
-    
+
     if not is_valid:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -788,11 +794,11 @@ async def place_construction(
     # Mettre à jour les données du tour de construction
     construction_data["constructions_placed"].append(tile_size)
     construction_data["total_size_used"] += tile_size
-    
+
     # Si le Ranger n'est pas amélioré, terminer l'action Construction après une tuile
     # Si amélioré, le joueur peut continuer à construire jusqu'à épuisement du total
     should_finish = False
-    
+
     if not is_improved:
         # Ranger non amélioré : terminer l'action après une construction
         should_finish = True
@@ -803,7 +809,7 @@ async def place_construction(
         elif total_size_used >= action_power:
             # Total atteint, terminer automatiquement
             should_finish = True
-    
+
     if should_finish:
         # Passer au joueur suivant
         next_player = GameLogic.get_next_player(
@@ -843,7 +849,7 @@ async def place_construction(
         message = f"Construction placée (coût: {cost} PO). Total utilisé: {total_size_used}/{action_power}. Reste: {remaining}"
     else:
         message = f"Construction placée avec succès (coût: {cost} PO). Tour terminé."
-    
+
     return GameActionResponse(
         success=True,
         message=message,

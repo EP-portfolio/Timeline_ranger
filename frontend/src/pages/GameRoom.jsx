@@ -71,17 +71,35 @@ const GameRoom = () => {
 
   const loadGameState = async () => {
     try {
+      setLoading(true)
       const response = await gamesAPI.getState(id)
-      console.log('Réponse API:', response.data) // Debug
+      console.log('Réponse API complète:', response)
+      console.log('Réponse API data:', response.data) // Debug
 
       // Vérifier que game_data existe
-      if (!response.data || !response.data.game_data) {
-        console.error('Structure de réponse invalide:', response.data)
-        setError('Structure de réponse invalide du serveur')
+      if (!response.data) {
+        console.error('Pas de data dans la réponse:', response)
+        setError('Pas de données dans la réponse du serveur')
+        setLoading(false)
         return
       }
 
-      setGameState(response.data.game_data)
+      if (!response.data.game_data) {
+        console.error('Structure de réponse invalide - pas de game_data:', response.data)
+        setError('Structure de réponse invalide du serveur (pas de game_data)')
+        setLoading(false)
+        return
+      }
+
+      const gameData = response.data.game_data
+      console.log('Game data chargé:', {
+        status: gameData.status,
+        turn_number: gameData.turn_number,
+        current_player: gameData.current_player,
+        players_count: Object.keys(gameData.players || {}).length
+      })
+
+      setGameState(gameData)
       setError('')
     } catch (error) {
       console.error('Erreur chargement état:', error)
@@ -89,6 +107,7 @@ const GameRoom = () => {
         message: error.message,
         response: error.response?.data,
         status: error.response?.status,
+        stack: error.stack
       })
       setError(
         error.response?.data?.detail ||
@@ -125,7 +144,7 @@ const GameRoom = () => {
     // Au lieu de jouer directement, on sélectionne l'action pour afficher les cartes jouables
     setSelectedAction({ color, power })
     setSelectedCardFromHand(null)
-    
+
     // Si c'est l'action Construction, charger les tuiles disponibles
     if (color === 'orange') {
       try {
