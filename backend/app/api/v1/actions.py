@@ -280,7 +280,7 @@ async def play_color_action(
                 "weapon_type": selected_card.get("weapon_type"),
             }
             board["weapons"] = board.get("weapons", []) + [new_weapon]
-            
+
             # Marquer la garnison comme occupée
             for garnison in board["garnisons"]:
                 if garnison["id"] == available_garnison["id"]:

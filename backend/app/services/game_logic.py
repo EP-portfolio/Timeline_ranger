@@ -211,16 +211,16 @@ class GameLogic:
     def initialize_board_grid(width: int = 10, height: int = 7) -> Dict[str, Any]:
         """
         Initialise la grille hexagonale de base de l'armure méca
-        
+
         Args:
             width: Largeur en hexagones (par défaut 10)
             height: Hauteur en hexagones (par défaut 7)
-        
+
         Returns:
             Dictionnaire contenant la grille hexagonale avec terrains par défaut
         """
         hexagons = []
-        
+
         # Générer tous les hexagones de la grille
         # Système de coordonnées hexagonales (q, r)
         for r in range(height):
@@ -228,26 +228,28 @@ class GameLogic:
             for q in range(width - offset):
                 hex_q = q + offset
                 hex_r = r
-                
+
                 # Déterminer le terrain par défaut selon la position
                 # Bordure = herbe, centre = terre craquelée
                 if q == 0 or q == width - 1 - offset or r == 0 or r == height - 1:
                     terrain = "grass"  # Herbe sur les bords
                 else:
                     terrain = "cracked_earth"  # Terre craquelée au centre
-                
-                hexagons.append({
-                    "q": hex_q,
-                    "r": hex_r,
-                    "x": 0,  # Sera calculé lors de l'affichage
-                    "y": 0,  # Sera calculé lors de l'affichage
-                    "terrain": terrain,
-                    "tokens": [],
-                    "special_zone": None,
-                    "garnison_id": None,
-                    "weapon_id": None,
-                })
-        
+
+                hexagons.append(
+                    {
+                        "q": hex_q,
+                        "r": hex_r,
+                        "x": 0,  # Sera calculé lors de l'affichage
+                        "y": 0,  # Sera calculé lors de l'affichage
+                        "terrain": terrain,
+                        "tokens": [],
+                        "special_zone": None,
+                        "garnison_id": None,
+                        "weapon_id": None,
+                    }
+                )
+
         return {
             "width": width,
             "height": height,
@@ -304,8 +306,9 @@ class GameLogic:
                 },
                 "board": {
                     # Grille hexagonale de base de l'armure méca
-                    # Initialisée avec la méthode initialize_board_grid()
-                    "grid": GameLogic.initialize_board_grid(width=10, height=7),
+                    # 9 colonnes contenant chacune 6 ou 7 emplacements
+                    # Les cases rocher et eau sont inconstructibles
+                    "grid": GameLogic.initialize_board_grid(),
                     "garnisons": [],  # Parties d'armure construites (constructions) - Tuiles hexagonales
                     "weapon_slots": [],  # Slots pour armes
                     "weapons": [],  # Armes installées (troupes)
