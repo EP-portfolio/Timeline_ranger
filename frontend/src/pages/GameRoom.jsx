@@ -569,5 +569,117 @@ function getCardColorByType(cardType) {
   return cardTypeColors[cardType] || '#2a2a2a' // Par défaut gris foncé
 }
 
+// Composant pour afficher la grille hexagonale
+function HexGrid({ hexagons, garnisons, weapons, tokens, specialZones }) {
+  // Calculer les positions des hexagones pour l'affichage
+  const hexSize = 30 // Taille d'un hexagone en pixels
+  const hexWidth = hexSize * 2
+  const hexHeight = Math.sqrt(3) * hexSize
+
+  // Fonction pour convertir coordonnées hexagonales (q, r) en coordonnées pixel
+  const hexToPixel = (q, r) => {
+    const x = hexSize * (Math.sqrt(3) * q + (Math.sqrt(3) / 2) * r)
+    const y = hexSize * ((3 / 2) * r)
+    return { x, y }
+  }
+
+  // Obtenir le terrain d'un hexagone
+  const getTerrainColor = (terrain, constructible) => {
+    if (!constructible) {
+      if (terrain === 'water') return '#3b82f6' // Bleu pour l'eau
+      if (terrain === 'rock') return '#6b7280' // Gris pour les rochers
+    }
+    return '#92400e' // Marron pour la terre craquelée (constructible)
+  }
+
+  // Vérifier si un hexagone a une garnison
+  const getGarnisonForHex = (q, r) => {
+    return garnisons.find(g => 
+      g.hexagons?.some(h => h.q === q && h.r === r)
+    )
+  }
+
+  // Vérifier si un hexagone a une arme
+  const getWeaponForHex = (q, r) => {
+    const garnison = getGarnisonForHex(q, r)
+    if (garnison && garnison.weapon_id) {
+      return weapons.find(w => w.id === garnison.weapon_id)
+    }
+    return null
+  }
+
+  return (
+    <div className="hex-grid-wrapper">
+      <svg 
+        className="hex-grid-svg" 
+        viewBox="0 0 800 600" 
+        preserveAspectRatio="xMidYMid meet"
+      >
+        {hexagons.map((hex, index) => {
+          const { x, y } = hexToPixel(hex.q, hex.r)
+          const terrainColor = getTerrainColor(hex.terrain, hex.constructible)
+          const garnison = getGarnisonForHex(hex.q, hex.r)
+          const weapon = getWeaponForHex(hex.q, hex.r)
+          
+          // Points pour dessiner l'hexagone
+          const points = []
+          for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI / 3) * i
+            const px = x + hexSize * Math.cos(angle)
+            const py = y + hexSize * Math.sin(angle)
+            points.push(`${px},${py}`)
+          }
+
+          return (
+            <g key={`hex-${hex.q}-${hex.r}`}>
+              <polygon
+                points={points.join(' ')}
+                fill={terrainColor}
+                stroke={hex.constructible ? '#666' : '#444'}
+                strokeWidth={1}
+                opacity={hex.constructible ? 0.8 : 0.5}
+                className="hex-cell"
+              />
+              {garnison && (
+                <circle
+                  cx={x}
+                  cy={y}
+                  r={hexSize * 0.6}
+                  fill="#10b981"
+                  opacity={0.3}
+                  className="garnison-marker"
+                />
+              )}
+              {weapon && (
+                <circle
+                  cx={x}
+                  cy={y}
+                  r={hexSize * 0.4}
+                  fill="#1f2937"
+                  opacity={0.7}
+                  className="weapon-marker"
+                />
+              )}
+              {/* Afficher les coordonnées pour debug (seulement quelques hexagones) */}
+              {hex.q < 3 && hex.r < 2 && (
+                <text
+                  x={x}
+                  y={y + 4}
+                  fontSize="8"
+                  fill="#fff"
+                  textAnchor="middle"
+                  className="hex-coords"
+                >
+                  {hex.q},{hex.r}
+                </text>
+              )}
+            </g>
+          )
+        })}
+      </svg>
+    </div>
+  )
+}
+
 export default GameRoom
 
