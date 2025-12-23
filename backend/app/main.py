@@ -28,19 +28,39 @@ app.add_middleware(
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Gestionnaire d'exceptions global pour garantir les en-têtes CORS."""
+    import traceback
     error_detail = str(exc)
+    error_traceback = traceback.format_exc()
+    
+    # Log l'erreur pour debug
+    print(f"[ERREUR GLOBALE] {error_detail}")
     if settings.DEBUG:
-        error_detail += f"\n{traceback.format_exc()}"
+        print(f"[TRACEBACK] {error_traceback}")
+    
+    # Déterminer l'origine autorisée
+    origin = request.headers.get("origin")
+    allowed_origins = settings.get_cors_origins()
+    
+    # Si l'origine est dans la liste autorisée, l'utiliser, sinon utiliser la première
+    if origin and origin in allowed_origins:
+        allow_origin = origin
+    elif allowed_origins:
+        allow_origin = allowed_origins[0]
+    else:
+        allow_origin = "*"
     
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
             "detail": "Erreur interne du serveur",
-            "error": error_detail if settings.DEBUG else "Une erreur est survenue"
+            "error": error_detail if settings.DEBUG else "Une erreur est survenue",
+            "traceback": error_traceback if settings.DEBUG else None
         },
         headers={
-            "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
+            "Access-Control-Allow-Origin": allow_origin,
             "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
         }
     )
 

@@ -61,7 +61,14 @@ async def register(user_data: UserCreate):
 @router.post("/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     """Connexion d'un utilisateur."""
-    user = UserModel.get_by_email(form_data.username)  # OAuth2 utilise 'username' pour l'email
+    try:
+        user = UserModel.get_by_email(form_data.username)  # OAuth2 utilise 'username' pour l'email
+    except Exception as e:
+        print(f"[ERREUR] Erreur lors de la récupération de l'utilisateur : {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erreur de connexion à la base de données : {str(e)}"
+        )
     
     if not user or not verify_password(form_data.password, user["password_hash"]):
         raise HTTPException(
@@ -70,22 +77,29 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    # Mettre à jour la dernière connexion
-    UserModel.update_last_login(user["id"])
-    
-    # Créer le token
-    access_token = create_access_token(
-        data={"sub": str(user["id"]), "email": user["email"]}
-    )
-    
-    # Retirer le password_hash de la réponse
-    user_response = {k: v for k, v in user.items() if k != "password_hash"}
-    
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user": user_response
-    }
+    try:
+        # Mettre à jour la dernière connexion
+        UserModel.update_last_login(user["id"])
+        
+        # Créer le token
+        access_token = create_access_token(
+            data={"sub": str(user["id"]), "email": user["email"]}
+        )
+        
+        # Retirer le password_hash de la réponse
+        user_response = {k: v for k, v in user.items() if k != "password_hash"}
+        
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": user_response
+        }
+    except Exception as e:
+        print(f"[ERREUR] Erreur lors de la création du token : {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erreur lors de la connexion : {str(e)}"
+        )
 
 
 @router.get("/me", response_model=UserResponse)
