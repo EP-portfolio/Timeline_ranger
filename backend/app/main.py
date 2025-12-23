@@ -87,6 +87,30 @@ async def health_check():
     return {"status": "healthy"}
 
 
+@app.get("/health/db")
+async def health_check_db():
+    """Vérification de la connexion à la base de données."""
+    try:
+        from app.core.database import Database
+        with Database.get_cursor() as cur:
+            cur.execute("SELECT 1")
+            result = cur.fetchone()
+            return {
+                "status": "healthy",
+                "database": "connected",
+                "host": settings.SUPABASE_HOST,
+                "port": settings.SUPABASE_PORT
+            }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "database": "disconnected",
+            "error": str(e),
+            "host": settings.SUPABASE_HOST,
+            "port": settings.SUPABASE_PORT
+        }
+
+
 @app.on_event("shutdown")
 async def shutdown():
     """Fermeture propre de l'application."""
