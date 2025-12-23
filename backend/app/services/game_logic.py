@@ -73,16 +73,38 @@ class GameLogic:
         # - troupe : Cartes Troupes (ex-Animaux) → Ranger Noir
         # - technology : Cartes Technologies (ex-Mécènes) → Ranger Bleu
         # - quete : Cartes Quêtes (ex-Projets de Conservation) → Ranger Vert
-        
+
         # Dictionnaire associant chaque type à ses noms spécifiques
+        # Les noms de Troupes utilisent le format: "{Type Arme} - {Nom Arme}"
+        # Format mappé selon le schéma: weapon_type_code.replace('_', ' ').title() - nom_arme
         card_names_by_type = {
             "troupe": [
-                "Explosif - Lion",
-                "Explosif - Tigre",
-                "Explosif - Ours",
-                "Munition - Aigle",
-                "Munition - Loup",
-                "Munition - Renard",
+                # Explosifs (ex-Prédateurs)
+                "Explosifs - Canon Alpha",
+                "Explosifs - Lance-Grenades Beta",
+                "Explosifs - Détonateur Gamma",
+                # Munitions Standard (ex-Animaux domestiques)
+                "Munitions Standard - Fusil M1",
+                "Munitions Standard - Carabine M2",
+                "Munitions Standard - Pistolet M3",
+                # Torpilles (ex-Animaux marins)
+                "Torpilles - Torpille T1",
+                "Torpilles - Missile Sous-Marin T2",
+                # Munitions Nucléaires (ex-Herbivores)
+                "Munitions Nucléaires - Projectile N1",
+                "Munitions Nucléaires - Ogive N2",
+                # Missiles Aériens (ex-Oiseaux)
+                "Missiles Aériens - Missile A1",
+                "Missiles Aériens - Drone A2",
+                # Armes Lourdes (ex-Ours)
+                "Armes Lourdes - Canon Lourd L1",
+                "Armes Lourdes - Mortier L2",
+                # Armes Intelligentes (ex-Primates)
+                "Armes Intelligentes - Système IA I1",
+                "Armes Intelligentes - Robot I2",
+                # Armes Toxiques (ex-Reptiles)
+                "Armes Toxiques - Projectile Toxique X1",
+                "Armes Toxiques - Gaz X2",
             ],
             "technology": [
                 "Système - Armure",
@@ -102,7 +124,7 @@ class GameLogic:
                 "Quête - Programme",
             ],
         }
-        
+
         card_types = ["troupe", "technology", "quete"]
 
         cards = []
