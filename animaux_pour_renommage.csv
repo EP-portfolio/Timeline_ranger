@@ -1,0 +1,162 @@
+﻿N° Carte,Nom Original,Catégories,Continents,Taille,Attrait,Conservation,Catégories_Str,Continents_Str
+341,CAPYBARA,['Animal domestique'],[],,0.0,,Péons,
+401,GUÉPARD,['Prédateur'],['Afrique'],5.0,6.0,,Démons,Tir
+402,LION,['Prédateur'],['Afrique'],4.0,9.0,,Démons,Tir
+403,LÉOPARD,['Prédateur'],['Afrique'],3.0,7.0,1.0,Démons,Tir
+404,CARACAL,['Prédateur'],['Afrique'],2.0,4.0,,Démons,Tir
+405,FENNEC,['Prédateur'],['Afrique'],1.0,3.0,,Démons,Tir
+406,TIGRE DE SIBÉRIE,['Prédateur'],['Asie'],5.0,10.0,2.0,Démons,Furtifs
+407,TIGRE DE SUMATRA,['Prédateur'],['Asie'],4.0,8.0,2.0,Démons,Furtifs
+408,OURS LIPPU,['Prédateur ; Ours'],['Asie'],3.0,6.0,,Prédateur ; Ours,Furtifs
+409,OURS MALAIS,['Prédateur ; Ours'],['Asie'],2.0,5.0,,Prédateur ; Ours,Furtifs
+410,MARTRE À GORGE JAUNE,['Prédateur'],['Asie'],1.0,3.0,,Démons,Furtifs
+411,GRIZZLY,['Prédateur ; Ours'],['Amériques'],5.0,9.0,,Prédateur ; Ours,Tank
+412,JAGUAR,['Prédateur'],['Amériques'],4.0,8.0,,Démons,Tank
+413,PUMA,['Prédateur'],['Amériques'],3.0,5.0,,Démons,Tank
+414,COATI ROUX,['Prédateur ; Ours'],['Amériques'],2.0,4.0,,Prédateur ; Ours,Tank
+415,RATON LAVEUR,['Prédateur ; Ours'],['Amériques'],1.0,4.0,,Prédateur ; Ours,Tank
+416,OURS BRUN D'EUROPE,['Prédateur ; Ours'],['Europe'],5.0,8.0,,Prédateur ; Ours,Corps à corps
+417,LOUP,['Prédateur'],['Europe'],4.0,4.0,,Démons,Corps à corps
+418,LYNX BORÉAL,['Prédateur'],['Europe'],3.0,2.0,,Démons,Corps à corps
+419,BLAIREAU EUROPÉEN,['Prédateur'],['Europe'],2.0,3.0,,Démons,Corps à corps
+420,HERMINE,['Prédateur'],['Europe'],1.0,3.0,,Démons,Corps à corps
+421,OTARIE À FOURRURE,['Prédateur'],['Australie'],5.0,8.0,,Démons,Soutien
+422,LION DE MER AUSTRALIEN,['Prédateur'],['Australie'],4.0,7.0,1.0,Démons,Soutien
+423,LION DE MER DE N.-ZÉLANDE,['Prédateur'],['Australie'],3.0,6.0,,Démons,Soutien
+424,DINGO,['Prédateur'],['Australie'],2.0,3.0,,Démons,Soutien
+425,DIABLE DE TASMANIE,['Prédateur'],['Australie'],1.0,4.0,,Démons,Soutien
+426,ÉLÉPHANT DE SAVANE D'AFRIQUE,['Herbivore'],['Afrique'],5.0,10.0,,Ent,Tir
+427,RHINOCÉROS BLANC,['Herbivore'],['Afrique'],4.0,9.0,,Ent,Tir
+428,GIRAFE,['Herbivore'],['Afrique'],3.0,7.0,,Ent,Tir
+429,ZÈBRE DE GRÉVY,['Herbivore'],['Afrique'],2.0,6.0,,Ent,Tir
+430,HIPPOPOTAME NAIN,['Herbivore'],['Afrique'],2.0,6.0,,Ent,Tir
+431,ÉLÉPHANT D'ASIE,['Herbivore'],['Asie'],5.0,8.0,1.0,Ent,Furtifs
+432,RHINOCÉROS INDIEN,['Herbivore'],['Asie'],4.0,9.0,,Ent,Furtifs
+433,PANDA GÉANT,['Herbivore ; Ours'],['Asie'],3.0,10.0,2.0,Herbivore ; Ours,Furtifs
+434,PANDA ROUX,['Herbivore ; Ours'],['Asie'],2.0,6.0,,Herbivore ; Ours,Furtifs
+435,TAPIR DE MALAISIE,['Herbivore'],['Asie'],2.0,5.0,,Ent,Furtifs
+436,BISON D'AMÉRIQUE DU NORD,['Herbivore'],['Amériques'],5.0,4.0,,Ent,Tank
+437,BŒUF MUSQUÉ,['Herbivore'],['Amériques'],4.0,5.0,,Ent,Tank
+438,RENNE,['Herbivore'],['Amériques'],3.0,5.0,,Ent,Tank
+439,LAMA,['Herbivore'],['Amériques'],2.0,4.0,,Ent,Tank
+440,TAPIR DES MONTAGNES,['Herbivore'],['Amériques'],2.0,4.0,1.0,Ent,Tank
+441,BISON D'EUROPE,['Herbivore'],['Europe'],5.0,6.0,,Ent,Corps à corps
+442,ÉLAN,['Herbivore'],['Europe'],4.0,7.0,,Ent,Corps à corps
+443,CERF ÉLAPHE,['Herbivore'],['Europe'],3.0,5.0,,Ent,Corps à corps
+444,BOUQUETIN DES ALPES,['Herbivore'],['Europe'],2.0,5.0,,Ent,Corps à corps
+445,PORC-ÉPIC À CRÊTE,['Herbivore'],['Europe'],1.0,3.0,,Ent,Corps à corps
+446,DUGONG,['Herbivore'],['Australie'],5.0,9.0,1.0,Ent,Soutien
+447,KANGOUROU ROUX,['Herbivore'],['Australie'],4.0,7.0,,Ent,Soutien
+448,KOALA,['Herbivore ; Ours'],['Australie'],3.0,8.0,,Herbivore ; Ours,Soutien
+449,ORNITHORYNQUE,['Herbivore'],['Australie'],2.0,4.0,,Ent,Soutien
+450,WOMBAT COMMUN,['Herbivore'],['Australie'],2.0,4.0,,Ent,Soutien
+451,NASIQUE,['Primate'],['Asie'],5.0,10.0,2.0,Singe de l'espace,Furtifs
+452,GALAGO DU SÉNÉGAL,['Primate'],['Afrique'],1.0,1.0,,Singe de l'espace,Tir
+453,MANGABEY À COLLIER,['Primate'],['Afrique'],4.0,8.0,,Singe de l'espace,Tir
+454,MAKI CATTA,['Primate'],['Afrique'],3.0,6.0,,Singe de l'espace,Tir
+455,COLOBE GUÉRÉZA,['Primate'],['Afrique'],3.0,6.0,,Singe de l'espace,Tir
+456,MACAQUE DE BARBARIE,['Primate'],['Afrique'],2.0,6.0,,Singe de l'espace,Tir
+457,MANDRILL,['Primate'],['Afrique'],5.0,9.0,2.0,Singe de l'espace,Tir
+458,MACAQUE JAPONAIS,['Primate'],['Asie'],3.0,7.0,,Singe de l'espace,Furtifs
+459,DOUC À PATTES ROUGES,['Primate'],['Asie'],4.0,7.0,,Singe de l'espace,Furtifs
+460,SEMNOPITHÈQUE OBSCUR,['Primate'],['Asie'],2.0,5.0,,Singe de l'espace,Furtifs
+461,TARSIER DE BORNÉO,['Primate'],['Asie'],1.0,3.0,,Singe de l'espace,Furtifs
+462,SEMNOPITHÈQUE ENTELLE,['Primate'],['Asie'],3.0,6.0,,Singe de l'espace,Furtifs
+463,SAPAJOU CAPUCIN,['Primate'],['Amériques'],2.0,5.0,,Singe de l'espace,Tank
+464,SINGE-ARAIGNÉE VARIÉ,['Primate'],['Amériques'],4.0,6.0,1.0,Singe de l'espace,Tank
+465,TAMARIN-LION DORÉ,['Primate'],['Amériques'],1.0,4.0,,Singe de l'espace,Tank
+466,HURLEUR DE BOLIVIE,['Primate'],['Amériques'],3.0,6.0,,Singe de l'espace,Tank
+467,SAÏMIRI DE L'ÉQUATEUR,['Primate'],['Amériques'],2.0,5.0,,Singe de l'espace,Tank
+468,TAMARIN PINCHÉ,['Primate'],['Amériques'],1.0,4.0,1.0,Singe de l'espace,Tank
+469,CROCODILE DU NIL,['Reptile'],['Afrique'],5.0,9.0,,Mecas,Tir
+470,MAMBA VERT DE L'OUEST,['Reptile'],['Afrique'],2.0,6.0,,Mecas,Tir
+471,TORTUE SILLONNÉE,['Reptile'],['Afrique'],3.0,6.0,1.0,Mecas,Tir
+472,VARAN DES SAVANES,['Reptile'],['Afrique'],2.0,5.0,,Mecas,Tir
+473,AGAME COMMUN,['Reptile'],['Afrique'],1.0,3.0,,Mecas,Tir
+474,PYTHON MOLURE,['Reptile'],['Asie'],2.0,7.0,,Mecas,Furtifs
+475,COBRA INDIEN,['Reptile'],['Asie'],2.0,6.0,,Mecas,Furtifs
+476,DRAGON DE KOMODO,['Reptile'],['Asie'],3.0,2.0,,Mecas,Furtifs
+477,CAMÉLÉON CASQUÉ,['Reptile'],['Asie'],1.0,4.0,,Mecas,Furtifs
+478,DRAGON D'EAU CHINOIS,['Reptile'],['Asie'],1.0,3.0,,Mecas,Furtifs
+479,ALLIGATOR D'AMÉRIQUE,['Reptile'],['Amériques'],4.0,7.0,,Mecas,Tank
+480,CAÏMAN À MUSEAU LARGE,['Reptile'],['Amériques'],4.0,6.0,,Mecas,Tank
+481,TORTUE GÉANTE DES GALÁPAGOS,['Reptile'],['Amériques'],3.0,8.0,2.0,Mecas,Tank
+482,ANACONDA,['Reptile'],['Amériques'],2.0,6.0,,Mecas,Tank
+483,BOA CONSTRICTOR,['Reptile'],['Amériques'],2.0,7.0,,Mecas,Tank
+484,CISTUDE D'EUROPE,['Reptile'],['Europe'],1.0,4.0,,Mecas,Corps à corps
+485,VIPÈRE PÉLIADE,['Reptile'],['Europe'],1.0,2.0,,Mecas,Corps à corps
+486,LÉZARD DES MURAILLES,['Reptile'],['Europe'],1.0,2.0,,Mecas,Corps à corps
+487,COULEUVRE À COLLIER,['Reptile'],['Europe'],1.0,3.0,,Mecas,Corps à corps
+488,ORVET COMMUN,['Reptile'],['Europe'],1.0,2.0,,Mecas,Corps à corps
+489,CROCODILE MARIN,['Reptile'],['Australie'],5.0,9.0,,Mecas,Soutien
+490,VARAN DE GOULD,['Reptile'],['Australie'],3.0,6.0,,Mecas,Soutien
+491,LÉZARD À COLLERETTE,['Reptile'],['Australie'],2.0,5.0,,Mecas,Soutien
+492,TAÏPAN DU DÉSERT,['Reptile'],['Australie'],2.0,5.0,,Mecas,Soutien
+493,DIABLE CORNU,['Reptile'],['Australie'],1.0,3.0,,Mecas,Soutien
+494,AUTRUCHE D'AFRIQUE,['Oiseau'],['Afrique'],5.0,8.0,,Ange,Tir
+495,MESSAGER SAGITTAIRE,['Oiseau'],['Afrique'],4.0,4.0,1.0,Ange,Tir
+496,MARABOUT D'AFRIQUE,['Oiseau'],['Afrique'],3.0,4.0,,Ange,Tir
+497,FLAMANT NAIN,['Oiseau'],['Afrique'],2.0,6.0,,Ange,Tir
+498,BEC-EN-SABOT DU NIL,['Oiseau'],['Afrique'],1.0,3.0,1.0,Ange,Tir
+499,VAUTOUR MOINE,['Oiseau'],['Asie'],5.0,6.0,,Ange,Furtifs
+500,VAUTOUR INDIEN,['Oiseau'],['Asie'],4.0,5.0,1.0,Ange,Furtifs
+501,PAON BLEU,['Oiseau'],['Asie'],3.0,7.0,,Ange,Furtifs
+502,CALAO BICORNE,['Oiseau'],['Asie'],2.0,6.0,,Ange,Furtifs
+503,HARFANG DES NEIGES,['Oiseau'],['Asie'],1.0,4.0,,Ange,Furtifs
+504,CONDOR DES ANDES,['Oiseau'],['Amériques'],5.0,7.0,,Ange,Tank
+505,PYGARGUE À TÊTE BLANCHE,['Oiseau'],['Amériques'],4.0,8.0,,Ange,Tank
+506,SARCORAMPHE ROI,['Oiseau'],['Amériques'],3.0,9.0,,Ange,Tank
+507,NANDOU D'AMÉRIQUE,['Oiseau'],['Amériques'],2.0,5.0,,Ange,Tank
+508,ARA ROUGE,['Oiseau'],['Amériques'],1.0,4.0,,Ange,Tank
+509,AIGLE ROYAL,['Oiseau'],['Europe'],5.0,7.0,,Ange,Corps à corps
+510,CIGOGNE BLANCHE,['Oiseau'],['Europe'],4.0,4.0,,Ange,Corps à corps
+511,FLAMANT ROSE,['Oiseau'],['Europe'],3.0,7.0,,Ange,Corps à corps
+512,HIBOU GRAND-DUC,['Oiseau'],['Europe'],2.0,4.0,,Ange,Corps à corps
+513,CHOUETTE EFFRAIE,['Oiseau'],['Europe'],1.0,3.0,,Ange,Corps à corps
+514,ÉMEU D'AUSTRALIE,['Oiseau'],['Australie'],5.0,7.0,,Ange,Soutien
+515,PÉLICAN À LUNETTES,['Oiseau'],['Australie'],4.0,5.0,,Ange,Soutien
+516,CASOAR UNICARONCULÉ,['Oiseau'],['Australie'],3.0,6.0,,Ange,Soutien
+517,MARTIN-CHASSEUR GÉANT,['Oiseau'],['Australie'],2.0,0.0,,Ange,Soutien
+518,PARADISIER PETIT-ÉMERAUDE,['Oiseau'],['Australie'],1.0,5.0,,Ange,Soutien
+519,CHÈVRE,['Animal domestique'],[],,0.0,,Péons,
+520,MOUTON,['Animal domestique'],[],,0.0,,Péons,
+521,CHEVAL,['Animal domestique'],[],,0.0,,Péons,
+522,ÂNE,['Animal domestique'],[],,0.0,,Péons,
+523,LAPIN,['Animal domestique'],[],,0.0,,Péons,
+524,PORC LAINEUX,['Animal domestique'],[],,0.0,,Péons,
+525,COCHON D'INDE,['Animal domestique'],[],,0.0,,Péons,
+526,ALPAGA,['Animal domestique'],[],,0.0,,Péons,
+527,LORIQUET À TÊTE BLEUE,['Animal domestique'],[],,0.0,,Péons,
+528,WALLABY À COU ROUGE,['Animal domestique'],[],,0.0,,Péons,
+529,ANÉMONE MAGNIFIQUE,['Animal marin'],['Australie'],1.0,3.0,,Void,Soutien
+530,POISSON-CLOWN DU PACIFIQUE,['Animal marin'],['Australie'],1.0,3.0,,Void,Soutien
+531,CHIRURGIEN BLEU,['Animal marin'],['Asie'],1.0,4.0,,Void,Furtifs
+532,ZOOPLANCTON,['Animal marin'],[],1.0,1.0,,Void,
+533,POISSON-FAUCON,['Animal marin'],['Australie'],2.0,4.0,,Void,Soutien
+534,PIEUVRE À ANNEAUX BLEUS,['Animal marin'],['Australie'],2.0,4.0,,Void,Soutien
+535,GOBIE NEZ DE REQUIN,['Animal marin'],['Amériques'],1.0,2.0,,Void,Tank
+536,POISSON VACHE À CORNES,['Animal marin'],['Afrique'],2.0,4.0,,Void,Tir
+537,BALISTE-PICASSO CLAIR,['Animal marin'],['Afrique'],2.0,5.0,,Void,Tir
+538,RASCASSE VOLANTE,['Animal marin'],['Asie'],2.0,6.0,,Void,Furtifs
+539,BOURSE CABRI,['Animal marin'],['Amériques'],1.0,5.0,,Void,Tank
+540,POISSON BALLON PINTADE,['Animal marin'],['Asie'],2.0,5.0,,Void,Furtifs
+541,PASTENAGUE À TACHES BLEUES,['Animal marin'],['Asie'],2.0,7.0,,Void,Furtifs
+542,NAPOLÉON,['Animal marin'],['Afrique'],3.0,6.0,1.0,Void,Tir
+543,RAIE MANTA DE RÉCIF,['Animal marin'],['Asie'],5.0,8.0,,Void,Furtifs
+544,REQUIN DE RÉCIF,['Animal marin ; Prédateur'],['Amériques'],4.0,5.0,,Animal marin ; Prédateur,Tank
+545,POISSON-SCIE VERT,['Animal marin'],['Afrique'],4.0,9.0,1.0,Void,Tir
+546,REQUIN-TAUREAU,['Animal marin ; Prédateur'],['Australie'],5.0,8.0,1.0,Animal marin ; Prédateur,Soutien
+547,GIRELLE,['Animal marin'],['Europe'],1.0,3.0,,Void,Corps à corps
+548,HIPPOCAMPE À MUSEAU COURT,['Animal marin'],['Europe'],1.0,2.0,,Void,Corps à corps
+549,PIEUVRE COMMUNE,['Animal marin'],['Europe'],3.0,5.0,,Void,Corps à corps
+550,MÉDUSE RAYONNÉE,['Animal marin'],['Europe'],3.0,6.0,,Void,Corps à corps
+551,TORTUE CAOUANNE,['Animal marin ; Reptile'],['Europe'],4.0,8.0,,Animal marin ; Reptile,Corps à corps
+552,TORTUE VERTE,['Animal marin ; Reptile'],['Amériques'],3.0,6.0,,Animal marin ; Reptile,Tank
+553,TAMBAQUI,['Animal marin ; Herbivore'],['Amériques'],1.0,5.0,,Animal marin ; Herbivore,Tank
+554,MANCHOT DU CAP,['Animal marin ; Oiseau'],['Afrique'],3.0,6.0,,Animal marin ; Oiseau,Tir
+555,RHINOPITHÈQUE DE ROXELLANE,['Primate'],['Asie'],3.0,6.0,1.0,Singe de l'espace,Furtifs
+556,GLOUTON,['Prédateur ; Ours'],['Europe'],3.0,5.0,,Prédateur ; Ours,Corps à corps
+557,COCHON VIETNAMIEN,['Animal domestique'],[],,0.0,,Péons,
+558,MURIQUI DU NORD,['Primate'],['Amériques'],4.0,6.0,1.0,Singe de l'espace,Tank
+559,PROPITHÈQUE DE COQUEREL,['Primate'],['Afrique'],3.0,7.0,,Singe de l'espace,Tir
+560,MILAN SACRÉ,['Oiseau'],['Australie'],3.0,6.0,,Ange,Soutien

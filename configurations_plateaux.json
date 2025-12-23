@@ -1,0 +1,362 @@
+[
+  {
+    "plateau_id": "A",
+    "nom_original": "Plateau A",
+    "nom_timeline_ranger": "Armure Méca Débutante",
+    "type": "Débutant",
+    "difficulte": "Facile",
+    "grille": {
+      "dimensions": {
+        "largeur": null,
+        "hauteur": null
+      },
+      "total_cases": null,
+      "cases_utilisables": null,
+      "cases_bloquees": [],
+      "zones_speciales": []
+    },
+    "capacite_speciale": {
+      "nom": "",
+      "description": "",
+      "effet": ""
+    },
+    "bonus_initiaux": [],
+    "contraintes": {}
+  },
+  {
+    "plateau_id": "0",
+    "nom_original": "Plateau 0",
+    "nom_timeline_ranger": "Armure Méca Standard",
+    "type": "Standard",
+    "difficulte": "Moyen",
+    "grille": {
+      "dimensions": {
+        "largeur": null,
+        "hauteur": null
+      },
+      "total_cases": null,
+      "cases_utilisables": null,
+      "cases_bloquees": [],
+      "zones_speciales": []
+    },
+    "capacite_speciale": {
+      "nom": "",
+      "description": "",
+      "effet": ""
+    },
+    "bonus_initiaux": [],
+    "contraintes": {}
+  },
+  {
+    "plateau_id": "1",
+    "nom_original": "Plateau 1",
+    "nom_timeline_ranger": "Armure Méca Type 1",
+    "type": "Avancé",
+    "difficulte": "Difficile",
+    "grille": {
+      "dimensions": {
+        "largeur": null,
+        "hauteur": null
+      },
+      "total_cases": null,
+      "cases_utilisables": null,
+      "cases_bloquees": [],
+      "zones_speciales": []
+    },
+    "capacite_speciale": {
+      "nom": "",
+      "description": "",
+      "effet": ""
+    },
+    "bonus_initiaux": [],
+    "contraintes": {}
+  },
+  {
+    "plateau_id": "2",
+    "nom_original": "Plateau 2",
+    "nom_timeline_ranger": "Armure Méca Type 2",
+    "type": "Avancé",
+    "difficulte": "Difficile",
+    "grille": {
+      "dimensions": {
+        "largeur": null,
+        "hauteur": null
+      },
+      "total_cases": null,
+      "cases_utilisables": null,
+      "cases_bloquees": [],
+      "zones_speciales": []
+    },
+    "capacite_speciale": {
+      "nom": "",
+      "description": "",
+      "effet": ""
+    },
+    "bonus_initiaux": [],
+    "contraintes": {}
+  },
+  {
+    "plateau_id": "3",
+    "nom_original": "Plateau 3",
+    "nom_timeline_ranger": "Armure Méca Type 3",
+    "type": "Avancé",
+    "difficulte": "Difficile",
+    "grille": {
+      "dimensions": {
+        "largeur": null,
+        "hauteur": null
+      },
+      "total_cases": null,
+      "cases_utilisables": null,
+      "cases_bloquees": [],
+      "zones_speciales": []
+    },
+    "capacite_speciale": {
+      "nom": "",
+      "description": "",
+      "effet": ""
+    },
+    "bonus_initiaux": [],
+    "contraintes": {}
+  },
+  {
+    "plateau_id": "4",
+    "nom_original": "Plateau 4",
+    "nom_timeline_ranger": "Armure Méca Type 4",
+    "type": "Avancé",
+    "difficulte": "Difficile",
+    "grille": {
+      "dimensions": {
+        "largeur": null,
+        "hauteur": null
+      },
+      "total_cases": null,
+      "cases_utilisables": null,
+      "cases_bloquees": [],
+      "zones_speciales": []
+    },
+    "capacite_speciale": {
+      "nom": "",
+      "description": "",
+      "effet": ""
+    },
+    "bonus_initiaux": [],
+    "contraintes": {}
+  },
+  {
+    "plateau_id": "5",
+    "nom_original": "Plateau 5",
+    "nom_timeline_ranger": "Armure Méca Type 5",
+    "type": "Avancé",
+    "difficulte": "Difficile",
+    "grille": {
+      "dimensions": {
+        "largeur": null,
+        "hauteur": null
+      },
+      "total_cases": null,
+      "cases_utilisables": null,
+      "cases_bloquees": [],
+      "zones_speciales": []
+    },
+    "capacite_speciale": {
+      "nom": "",
+      "description": "",
+      "effet": ""
+    },
+    "bonus_initiaux": [],
+    "contraintes": {}
+  },
+  {
+    "plateau_id": "6",
+    "nom_original": "Plateau 6",
+    "nom_timeline_ranger": "Armure Méca Type 6",
+    "type": "Avancé",
+    "difficulte": "Difficile",
+    "grille": {
+      "dimensions": {
+        "largeur": null,
+        "hauteur": null
+      },
+      "total_cases": null,
+      "cases_utilisables": null,
+      "cases_bloquees": [],
+      "zones_speciales": []
+    },
+    "capacite_speciale": {
+      "nom": "",
+      "description": "",
+      "effet": ""
+    },
+    "bonus_initiaux": [],
+    "contraintes": {}
+  },
+  {
+    "plateau_id": "7",
+    "nom_original": "Plateau 7",
+    "nom_timeline_ranger": "Armure Méca Type 7",
+    "type": "Avancé",
+    "difficulte": "Difficile",
+    "grille": {
+      "dimensions": {
+        "largeur": null,
+        "hauteur": null
+      },
+      "total_cases": null,
+      "cases_utilisables": null,
+      "cases_bloquees": [],
+      "zones_speciales": []
+    },
+    "capacite_speciale": {
+      "nom": "",
+      "description": "",
+      "effet": ""
+    },
+    "bonus_initiaux": [],
+    "contraintes": {}
+  },
+  {
+    "plateau_id": "8",
+    "nom_original": "Plateau 8",
+    "nom_timeline_ranger": "Armure Méca Type 8",
+    "type": "Avancé",
+    "difficulte": "Difficile",
+    "grille": {
+      "dimensions": {
+        "largeur": null,
+        "hauteur": null
+      },
+      "total_cases": null,
+      "cases_utilisables": null,
+      "cases_bloquees": [],
+      "zones_speciales": []
+    },
+    "capacite_speciale": {
+      "nom": "",
+      "description": "",
+      "effet": ""
+    },
+    "bonus_initiaux": [],
+    "contraintes": {}
+  },
+  {
+    "plateau_id": "11",
+    "nom_original": "Plateau 11 : Grottes",
+    "nom_timeline_ranger": "Armure Méca Grottes",
+    "type": "Spécialisé",
+    "difficulte": "Difficile",
+    "grille": {
+      "dimensions": {
+        "largeur": null,
+        "hauteur": null
+      },
+      "total_cases": null,
+      "cases_utilisables": null,
+      "cases_bloquees": [],
+      "zones_speciales": []
+    },
+    "capacite_speciale": {
+      "nom": "",
+      "description": "",
+      "effet": ""
+    },
+    "bonus_initiaux": [],
+    "contraintes": {}
+  },
+  {
+    "plateau_id": "12",
+    "nom_original": "Plateau 12 : Intelligence Artificielle",
+    "nom_timeline_ranger": "Armure Méca Intelligence Artificielle",
+    "type": "Spécialisé",
+    "difficulte": "Difficile",
+    "grille": {
+      "dimensions": {
+        "largeur": null,
+        "hauteur": null
+      },
+      "total_cases": null,
+      "cases_utilisables": null,
+      "cases_bloquees": [],
+      "zones_speciales": []
+    },
+    "capacite_speciale": {
+      "nom": "",
+      "description": "",
+      "effet": ""
+    },
+    "bonus_initiaux": [],
+    "contraintes": {}
+  },
+  {
+    "plateau_id": "13",
+    "nom_original": "Plateau 13 : Planche à Dessin",
+    "nom_timeline_ranger": "Armure Méca Planche à Dessin",
+    "type": "Spécialisé",
+    "difficulte": "Difficile",
+    "grille": {
+      "dimensions": {
+        "largeur": null,
+        "hauteur": null
+      },
+      "total_cases": null,
+      "cases_utilisables": null,
+      "cases_bloquees": [],
+      "zones_speciales": []
+    },
+    "capacite_speciale": {
+      "nom": "",
+      "description": "",
+      "effet": ""
+    },
+    "bonus_initiaux": [],
+    "contraintes": {}
+  },
+  {
+    "plateau_id": "14",
+    "nom_original": "Plateau 14 : Lagon",
+    "nom_timeline_ranger": "Armure Méca Lagon",
+    "type": "Spécialisé",
+    "difficulte": "Difficile",
+    "grille": {
+      "dimensions": {
+        "largeur": null,
+        "hauteur": null
+      },
+      "total_cases": null,
+      "cases_utilisables": null,
+      "cases_bloquees": [],
+      "zones_speciales": []
+    },
+    "capacite_speciale": {
+      "nom": "",
+      "description": "",
+      "effet": ""
+    },
+    "bonus_initiaux": [],
+    "contraintes": {}
+  },
+  {
+    "plateau_id": "T1",
+    "nom_original": "Plateau Tournoi 1",
+    "nom_timeline_ranger": "Armure Méca Tournoi",
+    "type": "Spécialisé",
+    "difficulte": "Difficile",
+    "grille": {
+      "dimensions": {
+        "largeur": null,
+        "hauteur": null
+      },
+      "total_cases": null,
+      "cases_utilisables": null,
+      "cases_bloquees": [],
+      "zones_speciales": []
+    },
+    "capacite_speciale": {
+      "nom": "",
+      "description": "",
+      "effet": ""
+    },
+    "bonus_initiaux": [],
+    "contraintes": {}
+  }
+]
