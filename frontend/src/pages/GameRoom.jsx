@@ -133,6 +133,9 @@ const GameRoom = () => {
   }
 
   const currentPlayerState = gameState.players?.[gameState.current_player]
+  const myPlayerState = Object.values(gameState.players || {}).find(
+    (p) => p.user_id === user?.id
+  )
   const isMyTurn = currentPlayerState?.user_id === user?.id
 
   return (
@@ -147,27 +150,112 @@ const GameRoom = () => {
       </header>
 
       <div className="game-room-content">
-        <div className="game-info">
-          <h2>Tour {gameState.turn_number}</h2>
-          <p>Joueur actif: {gameState.current_player}</p>
-          {isMyTurn && <p className="your-turn">C'est votre tour !</p>}
+        {/* Zone principale : RIVER (en haut) */}
+        <div className="river-section">
+          <h2>RIVER</h2>
+          <div className="river-content">
+            {/* Zone centrale : Image de la Map/Armure */}
+            <div className="map-armor-section">
+              <div className="map-armor-placeholder">
+                <p>IMAGE DE LA MAP/ARMURE</p>
+                {myPlayerState?.board && (
+                  <div className="board-info">
+                    <p>Garnisons: {myPlayerState.board.garnisons?.length || 0}</p>
+                    <p>Armes: {myPlayerState.board.weapons?.length || 0}</p>
+                    <p>Pièces d'armure: {myPlayerState.board.armor_pieces?.length || 0}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Colonne de gauche : Image MECA */}
+            <div className="meca-section">
+              <h3>IMAGE MECA</h3>
+              {myPlayerState?.armure_meca_id && (
+                <div className="meca-info">
+                  <p>Armure MECA #{myPlayerState.armure_meca_id}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Colonne de droite : Récapitulatif */}
+            <div className="recap-section">
+              <h3>RECAP</h3>
+              <div className="recap-content">
+                <div className="recap-item">
+                  <span className="recap-label">Tour:</span>
+                  <span className="recap-value">{gameState.turn_number}</span>
+                </div>
+                <div className="recap-item">
+                  <span className="recap-label">Joueur actif:</span>
+                  <span className="recap-value">{gameState.current_player}</span>
+                </div>
+                {myPlayerState && (
+                  <>
+                    <div className="recap-item">
+                      <span className="recap-label">Or:</span>
+                      <span className="recap-value">{myPlayerState.resources?.or || 0}</span>
+                    </div>
+                    <div className="recap-item">
+                      <span className="recap-label">Lasers:</span>
+                      <span className="recap-value">{myPlayerState.scores?.lasers || 0}</span>
+                    </div>
+                    <div className="recap-item">
+                      <span className="recap-label">Réputation:</span>
+                      <span className="recap-value">{myPlayerState.scores?.reputation || 0}</span>
+                    </div>
+                    <div className="recap-item">
+                      <span className="recap-label">Émissaires:</span>
+                      <span className="recap-value">{myPlayerState.emissaires || 0}</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="rangers-section">
-          <h3>Rangers (Actions de Couleur)</h3>
+        {/* Jauge de dégâts */}
+        {myPlayerState && (
+          <div className="damage-gauge-section">
+            <h3>JAUGE DÉGÂTS</h3>
+            <div className="damage-gauge">
+              <div className="gauge-bar">
+                <div
+                  className="gauge-fill"
+                  style={{
+                    width: `${Math.min((myPlayerState.scores?.points_degats || 0) / 100, 1) * 100}%`,
+                  }}
+                />
+              </div>
+              <span className="gauge-value">
+                {myPlayerState.scores?.points_degats || 0} / 100
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Cartes Action (Rangers) en bas */}
+        <div className="action-cards-section">
+          <h3>CARTES ACTION</h3>
           <div className="rangers-grid">
-            {currentPlayerState?.rangers?.map((ranger) => (
+            {myPlayerState?.rangers?.map((ranger) => (
               <div key={ranger.color} className="ranger-card">
-                <div className="ranger-color" style={{ backgroundColor: getColorHex(ranger.color) }}>
-                  {ranger.name}
+                <div
+                  className="ranger-color"
+                  style={{ backgroundColor: getColorHex(ranger.color) }}
+                >
+                  <div className="ranger-name">{ranger.name}</div>
+                  <div className="ranger-position">Position {ranger.position}</div>
+                  {ranger.improved && <div className="ranger-improved">★ Amélioré</div>}
                 </div>
-                <div className="ranger-position">Position: {ranger.position}</div>
                 {isMyTurn && (
                   <button
                     onClick={() => handlePlayColor(ranger.color, ranger.position)}
                     className="play-action-button"
+                    disabled={!isMyTurn}
                   >
-                    Jouer (Puissance {ranger.position})
+                    Jouer (Niveau {ranger.position})
                   </button>
                 )}
               </div>
@@ -175,8 +263,8 @@ const GameRoom = () => {
           </div>
         </div>
 
+        {/* Actions */}
         <div className="actions-section">
-          <h3>Actions</h3>
           {isMyTurn ? (
             <button onClick={handlePass} className="pass-button">
               Passer mon Tour
@@ -184,21 +272,6 @@ const GameRoom = () => {
           ) : (
             <p className="waiting">En attente du joueur {gameState.current_player}...</p>
           )}
-        </div>
-
-        <div className="players-section">
-          <h3>Joueurs</h3>
-          <div className="players-list">
-            {Object.values(gameState.players).map((player) => (
-              <div key={player.player_number} className="player-card">
-                <h4>Joueur {player.player_number}</h4>
-                <p>Or: {player.resources?.or || 0}</p>
-                <p>Points de dégâts: {player.scores?.points_degats || 0}</p>
-                <p>Lasers: {player.scores?.lasers || 0}</p>
-                <p>Réputation: {player.scores?.reputation || 0}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </div>
