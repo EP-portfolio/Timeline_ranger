@@ -292,10 +292,15 @@ async def play_color_action(
 
     elif action.color == ColorAction.ORANGE:
         # Action Construction
-        if action.action_data and "size" in action.action_data:
-            cost = action.action_data["size"] * 2
-            player_state["resources"]["or"] -= cost
-            # TODO: Ajouter la construction au plateau
+        # L'action Construction ne place pas directement la construction
+        # Elle permet au joueur de choisir une tuile et de la placer
+        # Le placement se fait via l'endpoint /place-construction
+        # Ici, on marque juste que l'action Construction a été jouée
+        # Le joueur pourra ensuite utiliser get_construction_tiles et place_construction
+        if action.action_data:
+            # L'action Construction a été sélectionnée, le joueur peut maintenant placer une tuile
+            # Le placement se fera via l'endpoint séparé /place-construction
+            pass
 
     elif action.color == ColorAction.GREEN:
         # Action Association
