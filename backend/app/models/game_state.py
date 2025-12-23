@@ -22,12 +22,6 @@ class GameStateModel:
             print(f"[ERREUR] Erreur de sérialisation JSON pour game_id {game_id}: {e}")
             print(f"[DEBUG] Type de state_data: {type(state_data)}")
             print(f"[DEBUG] Traceback: {traceback.format_exc()}")
-            # Essayer de trouver l'élément problématique
-            try:
-                import json
-                json.dumps(state_data, default=str)
-            except Exception as e2:
-                print(f"[DEBUG] Erreur détaillée: {e2}")
             raise ValueError(f"Impossible de sérialiser l'état du jeu en JSON: {e}")
         
         try:
