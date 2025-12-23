@@ -18,6 +18,12 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def get_password_hash(password: str) -> str:
     """Hash un mot de passe."""
+    # Bcrypt limite les mots de passe à 72 bytes
+    # Tronquer si nécessaire (en bytes, pas en caractères)
+    password_bytes = password.encode('utf-8')
+    if len(password_bytes) > 72:
+        password_bytes = password_bytes[:72]
+        password = password_bytes.decode('utf-8', errors='ignore')
     return pwd_context.hash(password)
 
 
