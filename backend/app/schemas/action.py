@@ -56,6 +56,19 @@ class ExchangeCardForXTokenRequest(BaseModel):
     card_id: str = Field(..., description="ID de la carte à échanger")
 
 
+class GetConstructionTilesRequest(BaseModel):
+    """Requête pour obtenir les tuiles de construction disponibles"""
+    max_size: int = Field(..., ge=1, le=5, description="Taille maximale (niveau de l'action)")
+
+
+class PlaceConstructionRequest(BaseModel):
+    """Requête pour placer une construction"""
+    tile_id: str = Field(..., description="ID de la tuile choisie")
+    anchor_q: int = Field(..., description="Colonne d'ancrage (q)")
+    anchor_r: int = Field(..., description="Position dans la colonne d'ancrage (r)")
+    rotation: int = Field(default=0, ge=-6, le=6, description="Rotation en multiples de 60° (positif = droite, négatif = gauche)")
+
+
 class GameActionResponse(BaseModel):
     """Réponse après une action"""
     success: bool = Field(..., description="Action réussie")

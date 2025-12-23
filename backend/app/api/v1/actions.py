@@ -12,6 +12,8 @@ from app.schemas.action import (
     PassActionRequest,
     SelectInitialHandRequest,
     ExchangeCardForXTokenRequest,
+    GetConstructionTilesRequest,
+    PlaceConstructionRequest,
     GameActionResponse,
     GameStateResponse,
     ColorAction,

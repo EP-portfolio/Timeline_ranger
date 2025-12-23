@@ -88,6 +88,8 @@ export const actionsAPI = {
   pass: (gameId, data) => api.post(`/games/${gameId}/actions/pass`, data),
   selectInitialHand: (gameId, data) => api.post(`/games/${gameId}/actions/select-initial-hand`, data),
   exchangeCardForXToken: (gameId, data) => api.post(`/games/${gameId}/actions/exchange-card-for-x-token`, data),
+  getConstructionTiles: (gameId, maxSize) => api.get(`/games/${gameId}/actions/construction-tiles?max_size=${maxSize}`),
+  placeConstruction: (gameId, data) => api.post(`/games/${gameId}/actions/place-construction`, data),
 }
 
 export default api
