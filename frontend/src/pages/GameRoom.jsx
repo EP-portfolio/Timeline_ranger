@@ -129,13 +129,14 @@ const GameRoom = () => {
   const handleConfirmActionWithCard = async () => {
     if (!selectedAction) return
 
-    // Si l'action ne nécessite pas de carte, on peut jouer directement
-    const needsCard = selectedAction.color === 'black' || selectedAction.color === 'blue'
-    
-    if (needsCard && !selectedCardFromHand) {
-      alert('Veuillez sélectionner une carte de votre main')
+    // Action Noire (Animaux) nécessite obligatoirement une carte Troupe
+    if (selectedAction.color === 'black' && !selectedCardFromHand) {
+      alert('Vous devez sélectionner une carte Troupe pour jouer l\'action Animaux')
       return
     }
+    
+    // Action Bleue peut être jouée avec ou sans carte
+    // Les autres actions (Orange, Vert, Jaune) ne nécessitent pas de carte
 
     try {
       const actionData = {}
@@ -373,14 +374,19 @@ const GameRoom = () => {
                   <div className="ranger-position">Position {ranger.position}</div>
                   {ranger.improved && <div className="ranger-improved">★ Amélioré</div>}
                 </div>
-                {gameState?.status === 'started' && isMyTurn && (
+                {gameState?.status === 'started' && isMyTurn && myPlayerState?.hand_selected && (
                   <button
                     onClick={() => handlePlayColor(ranger.color, ranger.position)}
                     className="play-action-button"
-                    disabled={!isMyTurn}
+                    disabled={selectedAction !== null}
                   >
                     Jouer (Niveau {ranger.position})
                   </button>
+                )}
+                {gameState?.status === 'started' && isMyTurn && !myPlayerState?.hand_selected && (
+                  <div className="play-action-button disabled">
+                    Sélectionnez d'abord vos cartes
+                  </div>
                 )}
                 {gameState?.status === 'waiting' && (
                   <div className="play-action-button disabled">
@@ -420,8 +426,75 @@ const GameRoom = () => {
           </div>
         )}
 
+        {/* Sélection de carte pour l'action */}
+        {selectedAction && (
+          <div className="card-selection-for-action">
+            <h3>
+              Action {selectedAction.color === 'blue' ? 'Mécène' : 
+                      selectedAction.color === 'black' ? 'Animaux' :
+                      selectedAction.color === 'orange' ? 'Construction' :
+                      selectedAction.color === 'green' ? 'Association' : 'Cartes'} 
+              (Niveau {selectedAction.power})
+            </h3>
+            <p className="selection-instruction">
+              {selectedAction.color === 'blue' && 'Sélectionnez une carte Mécène ou gagnez des crédits'}
+              {selectedAction.color === 'black' && 'Sélectionnez une carte Troupe à jouer'}
+              {selectedAction.color === 'orange' && 'Action Construction (pas de carte nécessaire)'}
+              {selectedAction.color === 'green' && 'Action Association (pas de carte nécessaire)'}
+              {selectedAction.color === 'yellow' && 'Action Cartes (pas de carte nécessaire)'}
+            </p>
+            
+            {getPlayableCards().length > 0 && (
+              <div className="playable-cards-section">
+                <h4>Cartes jouables :</h4>
+                <div className="cards-grid">
+                  {getPlayableCards().map((card) => (
+                    <div
+                      key={card.id}
+                      className={`card-item ${selectedCardFromHand === card.id ? 'selected' : ''}`}
+                      onClick={() => handleSelectCardFromHand(card.id)}
+                    >
+                      <div className="card-name">{card.name}</div>
+                      <div className="card-type">{card.type}</div>
+                      <div className="card-cost">Coût: {card.cost}</div>
+                      {card.size && <div className="card-size">Taille: {card.size}</div>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {selectedAction.color === 'blue' && (
+              <div className="action-options">
+                <button
+                  className={`option-button ${!selectedCardFromHand ? 'selected' : ''}`}
+                  onClick={() => setSelectedCardFromHand(null)}
+                >
+                  Gagner {selectedAction.power} crédits (pas de carte)
+                </button>
+              </div>
+            )}
+
+            <div className="action-confirm-buttons">
+              <button
+                onClick={handleConfirmActionWithCard}
+                className="confirm-action-button"
+                disabled={selectedAction.color === 'black' && !selectedCardFromHand}
+              >
+                Confirmer l'action
+              </button>
+              <button
+                onClick={handleCancelAction}
+                className="cancel-action-button"
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Cartes en main (après sélection) */}
-        {myPlayerState?.hand_selected && myPlayerState.hand?.length > 0 && (
+        {myPlayerState?.hand_selected && myPlayerState.hand?.length > 0 && !selectedAction && (
           <div className="hand-section">
             <h3>Mes Cartes en Main ({myPlayerState.hand.length})</h3>
             <div className="cards-grid">
