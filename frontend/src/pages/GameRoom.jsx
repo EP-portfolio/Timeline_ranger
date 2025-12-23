@@ -135,8 +135,14 @@ const GameRoom = () => {
       return
     }
 
-    // Action Bleue peut être jouée avec ou sans carte
-    // Les autres actions (Orange, Vert, Jaune) ne nécessitent pas de carte
+    // Action Verte (Association) nécessite obligatoirement une carte Quête
+    if (selectedAction.color === 'green' && !selectedCardFromHand) {
+      alert('Vous devez sélectionner une carte Quête pour jouer l\'action Association')
+      return
+    }
+    
+    // Action Bleue peut être jouée avec ou sans carte (technologie ou crédits)
+    // Les autres actions (Orange, Jaune) ne nécessitent pas de carte
 
     try {
       const actionData = {}
@@ -481,7 +487,7 @@ const GameRoom = () => {
               <button
                 onClick={handleConfirmActionWithCard}
                 className="confirm-action-button"
-                disabled={selectedAction.color === 'black' && !selectedCardFromHand}
+                disabled={(selectedAction.color === 'black' || selectedAction.color === 'green') && !selectedCardFromHand}
               >
                 Confirmer l'action
               </button>
