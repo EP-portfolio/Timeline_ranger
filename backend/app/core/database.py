@@ -22,9 +22,10 @@ class Database:
             try:
                 # Utiliser le port du pooler (6543) ou port direct (5432)
                 port = int(settings.SUPABASE_PORT)
-                # Permet d'utiliser un host de pooler dédié ou forcer l'IPv4 si nécessaire
-                host = settings.SUPABASE_POOLER_HOST or settings.SUPABASE_HOST
-                hostaddr = settings.SUPABASE_HOST_IPV4
+                # Utiliser le host standard (le pooler utilise le même host)
+                host = settings.SUPABASE_HOST
+                # hostaddr optionnel pour forcer IPv4 si nécessaire
+                hostaddr = getattr(settings, 'SUPABASE_HOST_IPV4', None)
                 cls._pool = psycopg2.pool.SimpleConnectionPool(
                     1,  # minconn
                     20,  # maxconn
