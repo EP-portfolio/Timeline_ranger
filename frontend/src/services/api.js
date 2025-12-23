@@ -2,12 +2,18 @@ import axios from 'axios'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
 
+// Log pour debug (uniquement en développement)
+if (import.meta.env.DEV) {
+  console.log('🔗 API URL:', API_BASE_URL)
+}
+
 // Créer une instance axios
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 secondes de timeout
 })
 
 // Intercepteur pour ajouter le token à chaque requête
@@ -28,12 +34,27 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Log des erreurs pour debug
+    console.error('❌ Erreur API:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      message: error.message,
+      data: error.response?.data,
+    })
+
     if (error.response?.status === 401) {
       // Token expiré ou invalide
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       window.location.href = '/login'
     }
+
+    // Gestion des erreurs réseau
+    if (error.code === 'ECONNABORTED' || error.message === 'Network Error') {
+      console.error('🌐 Erreur réseau - Vérifier CORS et URL API')
+    }
+
     return Promise.reject(error)
   }
 )

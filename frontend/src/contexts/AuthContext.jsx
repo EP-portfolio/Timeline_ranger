@@ -39,21 +39,30 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const formData = new FormData()
-      formData.append('username', email)
+      formData.append('username', email) // OAuth2 utilise 'username' pour l'email
       formData.append('password', password)
 
       const response = await authAPI.login(formData)
       const { access_token, user: userData } = response.data
 
+      // Si user n'est pas dans la réponse, le récupérer avec /me
+      let finalUserData = userData
+      if (!finalUserData) {
+        localStorage.setItem('token', access_token)
+        const userResponse = await authAPI.getCurrentUser()
+        finalUserData = userResponse.data
+      }
+
       localStorage.setItem('token', access_token)
-      localStorage.setItem('user', JSON.stringify(userData))
-      setUser(userData)
+      localStorage.setItem('user', JSON.stringify(finalUserData))
+      setUser(finalUserData)
 
       return { success: true }
     } catch (error) {
+      console.error('Erreur login:', error)
       return {
         success: false,
-        error: error.response?.data?.detail || 'Erreur de connexion',
+        error: error.response?.data?.detail || error.message || 'Erreur de connexion',
       }
     }
   }

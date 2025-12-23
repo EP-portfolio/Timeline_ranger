@@ -78,7 +78,14 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         data={"sub": str(user["id"]), "email": user["email"]}
     )
     
-    return {"access_token": access_token, "token_type": "bearer"}
+    # Retirer le password_hash de la réponse
+    user_response = {k: v for k, v in user.items() if k != "password_hash"}
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": user_response
+    }
 
 
 @router.get("/me", response_model=UserResponse)
