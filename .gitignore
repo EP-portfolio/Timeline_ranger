@@ -44,4 +44,7 @@ coverage/
 # Supabase / Render artifacts
 .supabase/
 
+# Documentation (ignorer tous les .md)
+*.md
+
 
