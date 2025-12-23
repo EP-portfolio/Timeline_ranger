@@ -18,24 +18,32 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def get_password_hash(password: str) -> str:
     """Hash un mot de passe."""
+    # Log pour debug
+    password_len = len(password) if password else 0
+    password_bytes_len = len(password.encode('utf-8')) if password else 0
+    print(f"[DEBUG] Hash password - longueur: {password_len} caractères, {password_bytes_len} bytes")
+    
     # Bcrypt limite les mots de passe à 72 bytes
-    # Passlib devrait gérer cela automatiquement, mais on force la troncature pour être sûr
-    if isinstance(password, str):
+    # Tronquer si nécessaire (en bytes, pas en caractères)
+    if password:
         password_bytes = password.encode('utf-8')
         if len(password_bytes) > 72:
-            # Tronquer à 72 bytes exactement
+            print(f"[WARN] Mot de passe trop long ({len(password_bytes)} bytes), troncature à 72 bytes")
             password_bytes = password_bytes[:72]
-            # Décoder en string pour passlib
             password = password_bytes.decode('utf-8', errors='ignore')
-    # Utiliser hash avec truncate_error=True pour éviter l'erreur
+    
     try:
         return pwd_context.hash(password)
     except ValueError as e:
-        # Si l'erreur persiste, tronquer manuellement
-        if "longer than 72 bytes" in str(e):
-            password_bytes = password.encode('utf-8')[:72]
-            password = password_bytes.decode('utf-8', errors='ignore')
-            return pwd_context.hash(password)
+        error_msg = str(e)
+        print(f"[ERREUR] Erreur lors du hashage: {error_msg}")
+        # Si l'erreur mentionne 72 bytes, forcer la troncature
+        if "72 bytes" in error_msg or "longer than" in error_msg.lower():
+            if password:
+                password_bytes = password.encode('utf-8')[:72]
+                password = password_bytes.decode('utf-8', errors='ignore')
+                print(f"[DEBUG] Nouvelle tentative avec mot de passe tronqué: {len(password.encode('utf-8'))} bytes")
+                return pwd_context.hash(password)
         raise
 
 
