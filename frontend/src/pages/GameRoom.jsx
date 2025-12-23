@@ -64,11 +64,29 @@ const GameRoom = () => {
   const loadGameState = async () => {
     try {
       const response = await gamesAPI.getState(id)
+      console.log('Réponse API:', response.data) // Debug
+      
+      // Vérifier que game_data existe
+      if (!response.data || !response.data.game_data) {
+        console.error('Structure de réponse invalide:', response.data)
+        setError('Structure de réponse invalide du serveur')
+        return
+      }
+      
       setGameState(response.data.game_data)
       setError('')
     } catch (error) {
       console.error('Erreur chargement état:', error)
-      setError('Erreur lors du chargement de l\'état du jeu')
+      console.error('Détails erreur:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      })
+      setError(
+        error.response?.data?.detail || 
+        error.message || 
+        'Erreur lors du chargement de l\'état du jeu'
+      )
     } finally {
       setLoading(false)
     }

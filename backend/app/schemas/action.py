@@ -58,7 +58,7 @@ class GameStateResponse(BaseModel):
     game_id: int
     status: str
     turn_number: int
-    current_player: int
+    current_player: Optional[int] = None  # Peut être None si la partie n'est pas démarrée
     players: List[Dict[str, Any]]
     game_data: Dict[str, Any] = Field(..., description="Données complètes de l'état du jeu")
     # Inclut : Rangers, main, plateau, ressources, scores, etc.
