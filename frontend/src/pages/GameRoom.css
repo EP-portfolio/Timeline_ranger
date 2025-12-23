@@ -492,8 +492,9 @@
 
 .card-item.selected {
   border-color: #10b981;
-  background: #1a3a2a;
   box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+  opacity: 0.9;
+  /* La couleur de fond reste celle du type de carte, mais avec une bordure verte */
 }
 
 .card-name {

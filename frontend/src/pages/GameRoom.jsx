@@ -501,7 +501,11 @@ const GameRoom = () => {
             <h3>Mes Cartes en Main ({myPlayerState.hand.length})</h3>
             <div className="cards-grid">
               {myPlayerState.hand.map((card) => (
-                <div key={card.id} className="card-item">
+                <div 
+                  key={card.id} 
+                  className="card-item"
+                  style={{ backgroundColor: getCardColorByType(card.type) }}
+                >
                   <div className="card-name">{card.name}</div>
                   <div className="card-type">{card.type}</div>
                   <div className="card-cost">Coût: {card.cost}</div>
