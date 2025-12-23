@@ -189,6 +189,16 @@ const GameRoom = () => {
         <div className="river-section">
           <h2>RIVER</h2>
           <div className="river-content">
+            {/* Colonne de gauche : Image MECA */}
+            <div className="meca-section">
+              <h3>IMAGE MECA</h3>
+              {myPlayerState?.armure_meca_id && (
+                <div className="meca-info">
+                  <p>Armure MECA #{myPlayerState.armure_meca_id}</p>
+                </div>
+              )}
+            </div>
+
             {/* Zone centrale : Image de la Map/Armure */}
             <div className="map-armor-section">
               <div className="map-armor-placeholder">
@@ -201,16 +211,6 @@ const GameRoom = () => {
                   </div>
                 )}
               </div>
-            </div>
-
-            {/* Colonne de gauche : Image MECA */}
-            <div className="meca-section">
-              <h3>IMAGE MECA</h3>
-              {myPlayerState?.armure_meca_id && (
-                <div className="meca-info">
-                  <p>Armure MECA #{myPlayerState.armure_meca_id}</p>
-                </div>
-              )}
             </div>
 
             {/* Colonne de droite : Récapitulatif */}
