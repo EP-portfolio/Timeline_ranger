@@ -28,6 +28,7 @@ class PlayColorActionRequest(BaseModel):
     color: ColorAction = Field(..., description="Couleur de l'action (Ranger)")
     power: int = Field(..., ge=1, le=5, description="Puissance de l'action (1-5)")
     use_x_token: bool = Field(default=False, description="Utiliser un jeton X pour augmenter la puissance")
+    selected_card_id: Optional[str] = Field(None, description="ID de la carte sélectionnée de la main (optionnel)")
     action_data: Optional[Dict[str, Any]] = Field(default=None, description="Données supplémentaires selon l'action")
 
 

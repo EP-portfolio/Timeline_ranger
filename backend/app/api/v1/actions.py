@@ -1,6 +1,7 @@
 """
 Routes pour les actions de jeu
 """
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Dict, Any
 from app.schemas.action import (
@@ -10,7 +11,7 @@ from app.schemas.action import (
     SelectInitialHandRequest,
     GameActionResponse,
     GameStateResponse,
-    ColorAction
+    ColorAction,
 )
 from app.models.game import GameModel, GamePlayerModel
 from app.api.v1.auth import get_current_user
@@ -23,30 +24,29 @@ router = APIRouter(prefix="/games", tags=["actions"])
 def get_game_state(game_id: int) -> Dict[str, Any]:
     """
     Récupère l'état du jeu depuis la base de données
-    
+
     Args:
         game_id: ID de la partie
-        
+
     Returns:
         État du jeu (avec clés normalisées en int pour players)
     """
     from app.models.game_state import GameStateModel
-    
+
     game = GameModel.get_by_id(game_id)
     if not game:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Partie non trouvée"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Partie non trouvée"
         )
-    
+
     # Récupérer les joueurs
     players = GamePlayerModel.list_by_game(game_id)
-    
+
     # Si la partie n'est pas démarrée, retourner un état avec les Rangers initialisés
     # pour permettre la visualisation de l'interface même sans démarrer la partie
     if game["status"] != "started":
         from app.services.game_logic import GameLogic
-        
+
         # Initialiser un état minimal avec les Rangers
         minimal_state = {
             "game_id": game_id,
@@ -54,9 +54,9 @@ def get_game_state(game_id: int) -> Dict[str, Any]:
             "turn_number": 0,
             "current_player": None,
             "player_order": [p["player_number"] for p in players],
-            "players": {}
+            "players": {},
         }
-        
+
         # Initialiser les Rangers et les ressources pour chaque joueur
         rangers = GameLogic.initialize_rangers()
         for p in players:
@@ -92,12 +92,12 @@ def get_game_state(game_id: int) -> Dict[str, Any]:
                 "x_tokens": 0,
                 "last_breath_cards": [],
             }
-        
+
         return minimal_state
-    
+
     # Essayer de récupérer l'état depuis la base de données
     saved_state = GameStateModel.get_latest(game_id)
-    
+
     if saved_state and saved_state.get("state_data"):
         # Normaliser les clés de players (convertir strings en int si nécessaire)
         state = saved_state["state_data"]
@@ -110,19 +110,19 @@ def get_game_state(game_id: int) -> Dict[str, Any]:
                     normalized_players[int(key)] = value
                 state["players"] = normalized_players
         return state
-    
+
     # Si aucun état n'existe mais la partie est démarrée, initialiser
     # (peut arriver si l'état n'a pas été sauvegardé correctement)
     state = GameLogic.initialize_game(game_id, players)
-    
+
     # Sauvegarder l'état initial
     GameStateModel.create(
         game_id=game_id,
         state_data=state,
         turn_number=state.get("turn_number", 1),
-        current_player=state.get("current_player")
+        current_player=state.get("current_player"),
     )
-    
+
     return state
 
 
@@ -130,7 +130,7 @@ def get_game_state(game_id: int) -> Dict[str, Any]:
 async def play_color_action(
     game_id: int,
     action: PlayColorActionRequest,
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user),
 ):
     """
     Joue une action de couleur (Ranger)
@@ -140,42 +140,40 @@ async def play_color_action(
     if not player:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Vous n'êtes pas dans cette partie"
+            detail="Vous n'êtes pas dans cette partie",
         )
-    
+
     # Récupérer l'état du jeu
     game_state = get_game_state(game_id)
-    
+
     # Vérifier que c'est le tour du joueur
     if game_state["current_player"] != player["player_number"]:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Ce n'est pas votre tour"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Ce n'est pas votre tour"
         )
-    
+
     # Récupérer l'état du joueur
     player_num = player["player_number"]
     player_state = game_state["players"].get(player_num)
     if not player_state:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"État du joueur {player_num} non trouvé"
+            detail=f"État du joueur {player_num} non trouvé",
         )
-    
+
     # Valider l'action
     is_valid, error_message = GameLogic.validate_color_action(
         color=action.color.value,
         power=action.power,
         player_state=player_state,
-        action_data=action.action_data
+        action_data=action.action_data,
     )
-    
+
     if not is_valid:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=error_message
+            status_code=status.HTTP_400_BAD_REQUEST, detail=error_message
         )
-    
+
     # Appliquer l'action (logique simplifiée pour le POC)
     # Trouver le Ranger joué
     played_ranger = None
@@ -183,72 +181,95 @@ async def play_color_action(
         if ranger["color"] == action.color.value:
             played_ranger = ranger
             break
-    
+
     # Faire tourner les Rangers
     player_state["rangers"] = GameLogic.rotate_ranger(
-        player_state["rangers"],
-        played_ranger["position"]
+        player_state["rangers"], played_ranger["position"]
     )
-    
+
     # Appliquer les effets selon l'action
     if action.color == ColorAction.BLUE:
         # Action Mécène
-        if action.action_data and "gain_credits" in action.action_data:
+        if action.selected_card_id:
+            # Jouer une carte Mécène
+            # Retirer la carte de la main
+            player_state["hand"] = [
+                card for card in player_state.get("hand", [])
+                if card["id"] != action.selected_card_id
+            ]
+            # TODO: Appliquer les effets de la carte Mécène
+        elif action.action_data and "gain_credits" in action.action_data:
+            # Gagner des crédits (pas de carte)
             player_state["resources"]["or"] += action.action_data["gain_credits"]
-        # TODO: Jouer une carte Mécène si demandé
-    
+
     elif action.color == ColorAction.BLACK:
-        # Action Animaux
-        # TODO: Jouer des animaux selon la puissance
-        pass
-    
+        # Action Animaux - Jouer une carte Troupe
+        if action.selected_card_id:
+            # Retirer la carte de la main
+            selected_card = None
+            for card in player_state.get("hand", []):
+                if card["id"] == action.selected_card_id:
+                    selected_card = card
+                    break
+            
+            if selected_card:
+                player_state["hand"] = [
+                    card for card in player_state.get("hand", [])
+                    if card["id"] != action.selected_card_id
+                ]
+                # TODO: Ajouter la carte au plateau (weapons)
+                # Pour le POC, on ne fait que retirer de la main
+
     elif action.color == ColorAction.ORANGE:
         # Action Construction
         if action.action_data and "size" in action.action_data:
             cost = action.action_data["size"] * 2
             player_state["resources"]["or"] -= cost
             # TODO: Ajouter la construction au plateau
-    
+
     elif action.color == ColorAction.GREEN:
         # Action Association
         if action.action_data and "gain_reputation" in action.action_data:
-            player_state["scores"]["reputation"] += action.action_data["gain_reputation"]
+            player_state["scores"]["reputation"] += action.action_data[
+                "gain_reputation"
+            ]
         # TODO: Réaliser des quêtes, récupérer mines/reliques
-    
+
     elif action.color == ColorAction.YELLOW:
         # Action Cartes
         # TODO: Piocher des cartes
         pass
-    
+
     # Passer au joueur suivant
     next_player = GameLogic.get_next_player(
-        game_state["current_player"],
-        game_state["player_order"]
+        game_state["current_player"], game_state["player_order"]
     )
     game_state["current_player"] = next_player
     game_state["turn_number"] += 1
-    
+
     # Sauvegarder l'état mis à jour
     from app.models.game_state import GameStateModel
+
     GameStateModel.update(
         game_id=game_id,
         state_data=game_state,
         turn_number=game_state["turn_number"],
-        current_player=game_state["current_player"]
+        current_player=game_state["current_player"],
     )
-    
+
     # Diffuser la mise à jour via WebSocket
     from app.api.v1.websocket import broadcast_game_state_update_sync
+
     try:
         broadcast_game_state_update_sync(game_id, game_state)
     except Exception as e:
         print(f"Erreur broadcast WebSocket: {e}")
-    
+
     return GameActionResponse(
         success=True,
         message=f"Action {action.color.value} jouée avec succès",
         game_state=game_state,
-        next_player=next_player
+        next_player=next_player,
     )
 
 
@@ -256,7 +277,7 @@ async def play_color_action(
 async def play_card_action(
     game_id: int,
     action: PlayCardActionRequest,
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user),
 ):
     """
     Joue une carte (troupe ou technologie)
@@ -266,28 +287,25 @@ async def play_card_action(
     if not player:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Vous n'êtes pas dans cette partie"
+            detail="Vous n'êtes pas dans cette partie",
         )
-    
+
     # Récupérer l'état du jeu
     game_state = get_game_state(game_id)
-    
+
     # Vérifier que c'est le tour du joueur
     if game_state["current_player"] != player["player_number"]:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Ce n'est pas votre tour"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Ce n'est pas votre tour"
         )
-    
+
     # TODO: Vérifier que la carte est dans la main du joueur
     # TODO: Vérifier les prérequis (coût, matières premières)
     # TODO: Placer la carte sur le plateau
     # TODO: Appliquer les effets de la carte
-    
+
     return GameActionResponse(
-        success=True,
-        message="Carte jouée avec succès",
-        game_state=game_state
+        success=True, message="Carte jouée avec succès", game_state=game_state
     )
 
 
@@ -295,7 +313,7 @@ async def play_card_action(
 async def pass_action(
     game_id: int,
     action: PassActionRequest,
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user),
 ):
     """
     Passe son tour
@@ -305,58 +323,57 @@ async def pass_action(
     if not player:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Vous n'êtes pas dans cette partie"
+            detail="Vous n'êtes pas dans cette partie",
         )
-    
+
     # Récupérer l'état du jeu
     game_state = get_game_state(game_id)
-    
+
     # Vérifier que c'est le tour du joueur
     if game_state["current_player"] != player["player_number"]:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Ce n'est pas votre tour"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Ce n'est pas votre tour"
         )
-    
+
     # Obtenir un jeton X (si on passe au niveau 1)
     # Pour le POC, on simplifie
-    
+
     # Passer au joueur suivant
     next_player = GameLogic.get_next_player(
-        game_state["current_player"],
-        game_state["player_order"]
+        game_state["current_player"], game_state["player_order"]
     )
     game_state["current_player"] = next_player
     game_state["turn_number"] += 1
-    
+
     # Sauvegarder l'état mis à jour
     from app.models.game_state import GameStateModel
+
     GameStateModel.update(
         game_id=game_id,
         state_data=game_state,
         turn_number=game_state["turn_number"],
-        current_player=game_state["current_player"]
+        current_player=game_state["current_player"],
     )
-    
+
     # Diffuser la mise à jour via WebSocket
     from app.api.v1.websocket import broadcast_game_state_update_sync
+
     try:
         broadcast_game_state_update_sync(game_id, game_state)
     except Exception as e:
         print(f"Erreur broadcast WebSocket: {e}")
-    
+
     return GameActionResponse(
         success=True,
         message="Tour passé",
         game_state=game_state,
-        next_player=next_player
+        next_player=next_player,
     )
 
 
 @router.get("/{game_id}/state", response_model=GameStateResponse)
 async def get_game_state_endpoint(
-    game_id: int,
-    current_user: dict = Depends(get_current_user)
+    game_id: int, current_user: dict = Depends(get_current_user)
 ):
     """
     Récupère l'état complet du jeu
@@ -366,37 +383,41 @@ async def get_game_state_endpoint(
     if not player:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Vous n'êtes pas dans cette partie"
+            detail="Vous n'êtes pas dans cette partie",
         )
-    
+
     # Récupérer l'état du jeu
     game_state = get_game_state(game_id)
-    
+
     # Formater la réponse
     players_list = []
     for player_num, player_state in game_state["players"].items():
-        players_list.append({
-            "player_number": player_num,
-            "user_id": player_state["user_id"],
-            "scores": player_state["scores"],
-            "resources": player_state["resources"],
-        })
-    
+        players_list.append(
+            {
+                "player_number": player_num,
+                "user_id": player_state["user_id"],
+                "scores": player_state["scores"],
+                "resources": player_state["resources"],
+            }
+        )
+
     return GameStateResponse(
         game_id=game_id,
         status=game_state["status"],
         turn_number=game_state["turn_number"],
         current_player=game_state["current_player"],
         players=players_list,
-        game_data=game_state
+        game_data=game_state,
     )
 
 
-@router.post("/{game_id}/actions/select-initial-hand", response_model=GameActionResponse)
+@router.post(
+    "/{game_id}/actions/select-initial-hand", response_model=GameActionResponse
+)
 async def select_initial_hand(
     game_id: int,
     selection: SelectInitialHandRequest,
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user),
 ):
     """
     Sélectionne 4 cartes parmi les 8 initiales
@@ -406,70 +427,71 @@ async def select_initial_hand(
     if not player:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Vous n'êtes pas dans cette partie"
+            detail="Vous n'êtes pas dans cette partie",
         )
-    
+
     # Récupérer l'état du jeu
     game_state = get_game_state(game_id)
-    
+
     # Vérifier que le joueur n'a pas déjà sélectionné
     player_num = player["player_number"]
     player_state = game_state["players"].get(player_num)
     if not player_state:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"État du joueur {player_num} non trouvé"
+            detail=f"État du joueur {player_num} non trouvé",
         )
-    
+
     if player_state.get("hand_selected", False):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Vous avez déjà sélectionné vos cartes"
+            detail="Vous avez déjà sélectionné vos cartes",
         )
-    
+
     # Vérifier que les cartes sélectionnées sont dans initial_hand
     initial_hand = player_state.get("initial_hand", [])
     initial_card_ids = {card["id"] for card in initial_hand}
     selected_ids = set(selection.selected_card_ids)
-    
+
     if not selected_ids.issubset(initial_card_ids):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Certaines cartes sélectionnées ne sont pas dans votre main initiale"
+            detail="Certaines cartes sélectionnées ne sont pas dans votre main initiale",
         )
-    
+
     if len(selected_ids) != 4:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Vous devez sélectionner exactement 4 cartes"
+            detail="Vous devez sélectionner exactement 4 cartes",
         )
-    
+
     # Sélectionner les 4 cartes
     selected_cards = [card for card in initial_hand if card["id"] in selected_ids]
-    
+
     # Mettre à jour l'état du joueur
     player_state["hand"] = selected_cards
     player_state["hand_selected"] = True
-    
+
     # Sauvegarder l'état mis à jour
     from app.models.game_state import GameStateModel
+
     GameStateModel.update(
         game_id=game_id,
         state_data=game_state,
         turn_number=game_state.get("turn_number", 1),
-        current_player=game_state.get("current_player")
+        current_player=game_state.get("current_player"),
     )
-    
+
     # Diffuser la mise à jour via WebSocket
     from app.api.v1.websocket import broadcast_game_state_update_sync
+
     try:
         broadcast_game_state_update_sync(game_id, game_state)
     except Exception as e:
         print(f"Erreur broadcast WebSocket: {e}")
-    
+
     return GameActionResponse(
         success=True,
         message="4 cartes sélectionnées avec succès",
-        game_state=game_state
+        game_state=game_state,
     )
-

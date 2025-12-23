@@ -558,3 +558,106 @@
   margin-bottom: 1rem;
 }
 
+/* Sélection de carte pour action */
+.card-selection-for-action {
+  background: #2a2a2a;
+  padding: 2rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  border: 2px solid #667eea;
+}
+
+.card-selection-for-action h3 {
+  color: #fff;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.selection-instruction {
+  color: #aaa;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-style: italic;
+}
+
+.playable-cards-section {
+  margin-bottom: 1.5rem;
+}
+
+.playable-cards-section h4 {
+  color: #fff;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.action-options {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+}
+
+.option-button {
+  padding: 0.75rem 1.5rem;
+  background: #1a1a1a;
+  color: #fff;
+  border: 2px solid #444;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.option-button:hover {
+  border-color: #667eea;
+}
+
+.option-button.selected {
+  border-color: #10b981;
+  background: #1a3a2a;
+}
+
+.action-confirm-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.confirm-action-button {
+  padding: 1rem 2rem;
+  background: #10b981;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.confirm-action-button:hover:not(:disabled) {
+  background: #059669;
+}
+
+.confirm-action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cancel-action-button {
+  padding: 1rem 2rem;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cancel-action-button:hover {
+  background: #dc2626;
+}
+

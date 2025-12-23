@@ -14,6 +14,8 @@ const GameRoom = () => {
   const [error, setError] = useState('')
   const [wsConnected, setWsConnected] = useState(false)
   const [selectedCards, setSelectedCards] = useState([])
+  const [selectedAction, setSelectedAction] = useState(null) // { color, power } ou null
+  const [selectedCardFromHand, setSelectedCardFromHand] = useState(null)
 
   useEffect(() => {
     loadGameState()
@@ -66,14 +68,14 @@ const GameRoom = () => {
     try {
       const response = await gamesAPI.getState(id)
       console.log('Réponse API:', response.data) // Debug
-      
+
       // Vérifier que game_data existe
       if (!response.data || !response.data.game_data) {
         console.error('Structure de réponse invalide:', response.data)
         setError('Structure de réponse invalide du serveur')
         return
       }
-      
+
       setGameState(response.data.game_data)
       setError('')
     } catch (error) {
@@ -84,8 +86,8 @@ const GameRoom = () => {
         status: error.response?.status,
       })
       setError(
-        error.response?.data?.detail || 
-        error.message || 
+        error.response?.data?.detail ||
+        error.message ||
         'Erreur lors du chargement de l\'état du jeu'
       )
     } finally {
@@ -114,19 +116,76 @@ const GameRoom = () => {
     }
   }
 
-  const handlePlayColor = async (color, power) => {
+  const handlePlayColor = (color, power) => {
+    // Au lieu de jouer directement, on sélectionne l'action pour afficher les cartes jouables
+    setSelectedAction({ color, power })
+    setSelectedCardFromHand(null)
+  }
+
+  const handleSelectCardFromHand = (cardId) => {
+    setSelectedCardFromHand(cardId)
+  }
+
+  const handleConfirmActionWithCard = async () => {
+    if (!selectedAction) return
+
+    // Si l'action ne nécessite pas de carte, on peut jouer directement
+    const needsCard = selectedAction.color === 'black' || selectedAction.color === 'blue'
+    
+    if (needsCard && !selectedCardFromHand) {
+      alert('Veuillez sélectionner une carte de votre main')
+      return
+    }
+
     try {
-      const response = await actionsAPI.playColor(id, {
-        color,
-        power,
+      const actionData = {}
+      if (selectedAction.color === 'blue' && !selectedCardFromHand) {
+        // Si pas de carte sélectionnée pour bleu, gagner des crédits
+        actionData.gain_credits = selectedAction.power
+      }
+
+      await actionsAPI.playColor(id, {
+        color: selectedAction.color,
+        power: selectedAction.power,
         use_x_token: false,
-        action_data: color === 'blue' ? { gain_credits: power } : {},
+        selected_card_id: selectedCardFromHand || null,
+        action_data: actionData,
       })
+      
+      // Réinitialiser la sélection
+      setSelectedAction(null)
+      setSelectedCardFromHand(null)
       // L'état sera mis à jour via WebSocket
     } catch (error) {
       console.error('Erreur action:', error)
       alert(error.response?.data?.detail || 'Erreur lors de l\'action')
     }
+  }
+
+  const handleCancelAction = () => {
+    setSelectedAction(null)
+    setSelectedCardFromHand(null)
+  }
+
+  // Filtrer les cartes jouables selon l'action sélectionnée
+  const getPlayableCards = () => {
+    if (!selectedAction || !myPlayerState?.hand) return []
+    
+    const { color } = selectedAction
+    
+    // Bleu (Mécène) : peut jouer des cartes Mécène ou gagner des crédits
+    // Pour le POC, on considère toutes les cartes comme jouables avec bleu
+    if (color === 'blue') {
+      return myPlayerState.hand
+    }
+    
+    // Noir (Animaux) : peut jouer des cartes Troupe
+    if (color === 'black') {
+      return myPlayerState.hand.filter(card => card.type === 'troupe')
+    }
+    
+    // Orange, Vert, Jaune : pas de cartes à jouer pour l'instant
+    return []
   }
 
   const handlePass = async () => {
@@ -141,7 +200,7 @@ const GameRoom = () => {
 
   const handleCardSelect = (cardId) => {
     if (!myPlayerState?.initial_hand || myPlayerState.hand_selected) return
-    
+
     setSelectedCards(prev => {
       if (prev.includes(cardId)) {
         return prev.filter(id => id !== cardId)
@@ -157,7 +216,7 @@ const GameRoom = () => {
       alert('Vous devez sélectionner exactement 4 cartes')
       return
     }
-    
+
     try {
       await actionsAPI.selectInitialHand(id, { selected_card_ids: selectedCards })
       setSelectedCards([])
@@ -183,15 +242,15 @@ const GameRoom = () => {
   // Note: On affiche l'interface même si la partie est en "waiting"
   // pour permettre la visualisation des Rangers et de l'interface
 
-  const currentPlayerState = gameState.current_player 
-    ? gameState.players?.[gameState.current_player] 
+  const currentPlayerState = gameState.current_player
+    ? gameState.players?.[gameState.current_player]
     : null
   const myPlayerState = Object.values(gameState.players || {}).find(
     (p) => p.user_id === user?.id
   )
-  const isMyTurn = gameState.current_player !== null && 
-                   gameState.current_player !== undefined &&
-                   currentPlayerState?.user_id === user?.id
+  const isMyTurn = gameState.current_player !== null &&
+    gameState.current_player !== undefined &&
+    currentPlayerState?.user_id === user?.id
 
   return (
     <div className="game-room">
