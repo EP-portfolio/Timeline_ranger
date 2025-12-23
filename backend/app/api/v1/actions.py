@@ -29,9 +29,8 @@ def get_game_state(game_id: int) -> Dict[str, Any]:
     Returns:
         État du jeu
     """
-    # Pour le POC, on stocke l'état dans game_states
-    # À implémenter avec le modèle GameStateModel
-    # Pour l'instant, on retourne un état basique
+    from app.models.game_state import GameStateModel
+    
     game = GameModel.get_by_id(game_id)
     if not game:
         raise HTTPException(
@@ -39,21 +38,34 @@ def get_game_state(game_id: int) -> Dict[str, Any]:
             detail="Partie non trouvée"
         )
     
+    # Si la partie n'est pas démarrée, retourner une erreur
+    if game["status"] != "started":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La partie n'a pas encore été démarrée"
+        )
+    
+    # Essayer de récupérer l'état depuis la base de données
+    saved_state = GameStateModel.get_latest(game_id)
+    
+    if saved_state and saved_state.get("state_data"):
+        # Retourner l'état sauvegardé
+        return saved_state["state_data"]
+    
+    # Si aucun état n'existe, initialiser (ne devrait pas arriver si la partie est démarrée)
     # Récupérer les joueurs
     players = GamePlayerModel.list_by_game(game_id)
+    state = GameLogic.initialize_game(game_id, players)
     
-    # Pour le POC, on initialise l'état si nécessaire
-    # Dans une vraie implémentation, on récupérerait depuis game_states
-    if game["status"] == "started":
-        # Initialiser l'état si c'est le premier appel
-        # (dans une vraie implémentation, on vérifierait si l'état existe)
-        state = GameLogic.initialize_game(game_id, players)
-        return state
-    
-    raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        detail="La partie n'a pas encore été démarrée"
+    # Sauvegarder l'état initial
+    GameStateModel.create(
+        game_id=game_id,
+        state_data=state,
+        turn_number=state.get("turn_number", 1),
+        current_player=state.get("current_player")
     )
+    
+    return state
 
 
 @router.post("/{game_id}/actions/play-color", response_model=GameActionResponse)
