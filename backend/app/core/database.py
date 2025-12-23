@@ -22,18 +22,22 @@ class Database:
             try:
                 # Utiliser le port du pooler (6543) ou port direct (5432)
                 port = int(settings.SUPABASE_PORT)
+                # Permet d'utiliser un host de pooler dédié ou forcer l'IPv4 si nécessaire
+                host = settings.SUPABASE_POOLER_HOST or settings.SUPABASE_HOST
+                hostaddr = settings.SUPABASE_HOST_IPV4
                 cls._pool = psycopg2.pool.SimpleConnectionPool(
                     1,  # minconn
                     20,  # maxconn
-                    host=settings.SUPABASE_HOST,
+                    host=host,
                     database=settings.SUPABASE_DB,
                     user=settings.SUPABASE_USER,
                     password=settings.SUPABASE_PASSWORD,
                     port=port,
+                    hostaddr=hostaddr if hostaddr else None,
                     sslmode='require'  # Supabase requiert SSL
                 )
                 if cls._pool:
-                    print(f"[OK] Pool de connexions PostgreSQL initialise (port {port})")
+                    print(f"[OK] Pool de connexions PostgreSQL initialise (host {host}, port {port}, hostaddr {hostaddr})")
                 else:
                     print("[ERREUR] Echec de l'initialisation du pool")
             except Exception as e:
