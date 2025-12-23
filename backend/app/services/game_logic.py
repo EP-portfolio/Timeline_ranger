@@ -556,6 +556,12 @@ class GameLogic:
                 "mines": [],  # Mines acquises (vibranium, titanium, etc.)
                 "can_improve_ranger": False,  # Peut améliorer un Ranger (après 2ème mine)
                 "improve_ranger_pending": False,  # Amélioration de Ranger en attente
+                "construction_turn_data": {  # Données pour le tour de construction
+                    "action_power": None,  # Niveau de l'action Construction jouée
+                    "constructions_placed": [],  # Liste des tailles des tuiles construites dans ce tour
+                    "total_size_used": 0,  # Total des tailles utilisées
+                    "is_improved": False,  # Ranger amélioré ou non
+                },
             }
 
         # Déterminer l'ordre de jeu initial (aléatoire)

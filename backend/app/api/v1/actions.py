@@ -600,3 +600,252 @@ async def select_initial_hand(
         message="4 cartes sélectionnées avec succès",
         game_state=game_state,
     )
+
+
+@router.get("/{game_id}/actions/construction-tiles")
+async def get_construction_tiles(
+    game_id: int,
+    max_size: int,
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Récupère les tuiles de construction disponibles selon le niveau de l'action
+    """
+    # Vérifier que l'utilisateur est dans la partie
+    player = GamePlayerModel.get_by_game_and_user(game_id, current_user["id"])
+    if not player:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Vous n'êtes pas dans cette partie",
+        )
+
+    # Récupérer les tuiles disponibles (taille <= max_size)
+    available_tiles = GameLogic.get_available_construction_tiles(max_size)
+    
+    return {
+        "success": True,
+        "tiles": available_tiles,
+        "max_size": max_size,
+    }
+
+
+@router.post("/{game_id}/actions/place-construction", response_model=GameActionResponse)
+async def place_construction(
+    game_id: int,
+    placement: PlaceConstructionRequest,
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Place une construction sur le plateau
+    Déroulé complet avec gestion du Ranger amélioré
+    """
+    # Vérifier que l'utilisateur est dans la partie
+    player = GamePlayerModel.get_by_game_and_user(game_id, current_user["id"])
+    if not player:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Vous n'êtes pas dans cette partie",
+        )
+
+    # Récupérer l'état du jeu
+    game_state = get_game_state(game_id)
+    player_num = player["player_number"]
+    player_state = game_state["players"].get(player_num)
+    
+    if not player_state:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"État du joueur {player_num} non trouvé",
+        )
+
+    # Vérifier que c'est le tour du joueur
+    if game_state["current_player"] != player_num:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ce n'est pas votre tour",
+        )
+
+    # Récupérer les données du tour de construction
+    construction_data = player_state.get("construction_turn_data", {})
+    if not construction_data or construction_data.get("action_power") is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Vous devez d'abord jouer l'action Construction",
+        )
+    
+    action_power = construction_data["action_power"]
+    is_improved = construction_data.get("is_improved", False)
+    constructions_placed = construction_data.get("constructions_placed", [])
+    total_size_used = construction_data.get("total_size_used", 0)
+    
+    # Récupérer la tuile choisie
+    available_tiles = GameLogic.get_available_construction_tiles(action_power)
+    selected_tile = next((t for t in available_tiles if t["id"] == placement.tile_id), None)
+    
+    if not selected_tile:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Tuile non trouvée ou non disponible",
+        )
+    
+    # Vérifier les contraintes selon si le Ranger est amélioré
+    tile_size = selected_tile["size"]
+    
+    if is_improved:
+        # Ranger amélioré : plusieurs tuiles possibles
+        # Vérifier qu'on ne dépasse pas le total de taille
+        if total_size_used + tile_size > action_power:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Total des tailles dépassé (utilisé: {total_size_used}, ajout: {tile_size}, max: {action_power})",
+            )
+        
+        # Vérifier qu'on ne construit pas deux tuiles de même taille
+        if tile_size in constructions_placed:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Vous ne pouvez pas construire deux tuiles de taille {tile_size} dans le même tour",
+            )
+    else:
+        # Ranger non amélioré : une seule tuile
+        if len(constructions_placed) > 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Ranger non amélioré : vous ne pouvez construire qu'une seule tuile par tour",
+            )
+        
+        # Vérifier que la taille ne dépasse pas le niveau
+        if tile_size > action_power:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Taille de tuile ({tile_size}) supérieure au niveau de l'action ({action_power})",
+            )
+
+    # Appliquer la rotation à la tuile
+    rotated_hexagons = GameLogic.rotate_tile_hexagons(
+        selected_tile["hexagons"],
+        placement.rotation
+    )
+
+    # Valider le placement
+    board = player_state.get("board", {})
+    grid = board.get("grid", {})
+    grid_hexagons = grid.get("hexagons", [])
+    existing_garnisons = board.get("garnisons", [])
+    
+    is_valid, error_message = GameLogic.validate_tile_placement(
+        grid_hexagons,
+        rotated_hexagons,
+        placement.anchor_q,
+        placement.anchor_r,
+        existing_garnisons
+    )
+    
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=error_message,
+        )
+
+    # Vérifier que le joueur a assez d'or
+    cost = selected_tile["cost"]
+    if player_state["resources"]["or"] < cost:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Vous n'avez pas assez d'or (nécessaire: {cost}, disponible: {player_state['resources']['or']})",
+        )
+
+    # Débiter l'or
+    player_state["resources"]["or"] -= cost
+
+    # Créer la garnison avec les hexagones absolus
+    absolute_hexagons = []
+    for hex_rel in rotated_hexagons:
+        abs_q = placement.anchor_q + hex_rel["q"]
+        abs_r = placement.anchor_r + hex_rel["r"]
+        absolute_hexagons.append({"q": abs_q, "r": abs_r})
+
+    new_garnison = {
+        "id": f"garnison_{len(existing_garnisons) + 1}_{random.randint(1000, 9999)}",
+        "size": selected_tile["size"],
+        "shape": selected_tile["shape"],
+        "hexagons": absolute_hexagons,
+        "occupied": False,
+        "weapon_id": None,
+        "tile_id": selected_tile["id"],
+        "rotation": placement.rotation,
+    }
+    existing_garnisons.append(new_garnison)
+    board["garnisons"] = existing_garnisons
+
+    # Mettre à jour la grille : marquer les hexagones comme occupés
+    for hex in grid_hexagons:
+        for abs_hex in absolute_hexagons:
+            if hex["q"] == abs_hex["q"] and hex["r"] == abs_hex["r"]:
+                hex["garnison_id"] = new_garnison["id"]
+                break
+
+    # Mettre à jour les données du tour de construction
+    construction_data["constructions_placed"].append(tile_size)
+    construction_data["total_size_used"] += tile_size
+    
+    # Si le Ranger n'est pas amélioré, terminer l'action Construction après une tuile
+    # Si amélioré, le joueur peut continuer à construire jusqu'à épuisement du total
+    should_finish = False
+    
+    if not is_improved:
+        # Ranger non amélioré : terminer l'action après une construction
+        should_finish = True
+    else:
+        # Ranger amélioré : vérifier si le joueur veut terminer ou continuer
+        if placement.finish_construction_turn:
+            should_finish = True
+        elif total_size_used >= action_power:
+            # Total atteint, terminer automatiquement
+            should_finish = True
+    
+    if should_finish:
+        # Passer au joueur suivant
+        next_player = GameLogic.get_next_player(
+            game_state["current_player"], game_state["player_order"]
+        )
+        game_state["current_player"] = next_player
+        game_state["turn_number"] += 1
+        # Réinitialiser les données de construction
+        player_state["construction_turn_data"] = {
+            "action_power": None,
+            "constructions_placed": [],
+            "total_size_used": 0,
+            "is_improved": False,
+        }
+
+    # Sauvegarder l'état mis à jour
+    from app.models.game_state import GameStateModel
+
+    GameStateModel.update(
+        game_id=game_id,
+        state_data=game_state,
+        turn_number=game_state.get("turn_number", 1),
+        current_player=game_state.get("current_player"),
+    )
+
+    # Diffuser la mise à jour via WebSocket
+    from app.api.v1.websocket import broadcast_game_state_update_sync
+
+    try:
+        broadcast_game_state_update_sync(game_id, game_state)
+    except Exception as e:
+        print(f"Erreur broadcast WebSocket: {e}")
+
+    # Message selon si le Ranger est amélioré
+    if is_improved:
+        remaining = action_power - construction_data["total_size_used"]
+        message = f"Construction placée (coût: {cost} PO). Total utilisé: {total_size_used}/{action_power}. Reste: {remaining}"
+    else:
+        message = f"Construction placée avec succès (coût: {cost} PO). Tour terminé."
+    
+    return GameActionResponse(
+        success=True,
+        message=message,
+        game_state=game_state,
+    )
