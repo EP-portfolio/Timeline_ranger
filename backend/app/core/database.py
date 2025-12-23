@@ -25,9 +25,10 @@ class Database:
                 port = int(settings.SUPABASE_PORT)
                 # Utiliser le host standard (le pooler utilise le même host)
                 host = settings.SUPABASE_HOST
-                
+
                 # Forcer IPv4 en résolvant le host en IPv4
                 import socket
+
                 try:
                     # Résoudre le host en IPv4
                     ipv4 = socket.gethostbyname(host)
@@ -35,7 +36,7 @@ class Database:
                 except socket.gaierror as e:
                     print(f"[ERREUR] Impossible de résoudre {host} en IPv4: {e}")
                     ipv4 = None
-                
+
                 cls._pool = psycopg2.pool.SimpleConnectionPool(
                     1,  # minconn
                     20,  # maxconn
