@@ -303,11 +303,16 @@ class GameLogic:
                     "paires_ailes": 0,
                 },
                 "board": {
-                    "garnisons": [],  # Parties d'armure construites (constructions)
+                    # Grille hexagonale de base de l'armure méca
+                    # Initialisée avec la méthode initialize_board_grid()
+                    "grid": GameLogic.initialize_board_grid(width=10, height=7),
+                    "garnisons": [],  # Parties d'armure construites (constructions) - Tuiles hexagonales
                     "weapon_slots": [],  # Slots pour armes
                     "weapons": [],  # Armes installées (troupes)
                     "armor_pieces": [],  # Pièces d'armure (technologies)
                     "lasers": [],  # Lasers installés
+                    "tokens": [],  # Jetons placés sur le plateau (ressources, points, etc.)
+                    "special_zones": [],  # Zones spéciales (mines, etc.)
                 },
                 "emissaires": 1,  # Émissaires disponibles
                 "x_tokens": 0,  # Jetons X (croix)
