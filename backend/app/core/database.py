@@ -1,6 +1,7 @@
 """
 Gestion de la connexion à la base de données PostgreSQL (Supabase)
 """
+
 import psycopg2
 from psycopg2 import pool
 from psycopg2.extras import RealDictCursor
@@ -12,9 +13,9 @@ from app.core.config import settings
 
 class Database:
     """Gestionnaire de pool de connexions PostgreSQL."""
-    
+
     _pool: Optional[pool.SimpleConnectionPool] = None
-    
+
     @classmethod
     def initialize(cls):
         """Initialise le pool de connexions."""
@@ -24,44 +25,55 @@ class Database:
                 port = int(settings.SUPABASE_PORT)
                 # Utiliser le host standard (le pooler utilise le même host)
                 host = settings.SUPABASE_HOST
-                # hostaddr optionnel pour forcer IPv4 si nécessaire
-                hostaddr = getattr(settings, 'SUPABASE_HOST_IPV4', None)
+                
+                # Forcer IPv4 en résolvant le host en IPv4
+                import socket
+                try:
+                    # Résoudre le host en IPv4
+                    ipv4 = socket.gethostbyname(host)
+                    print(f"[INFO] Host {host} résolu en IPv4: {ipv4}")
+                except socket.gaierror as e:
+                    print(f"[ERREUR] Impossible de résoudre {host} en IPv4: {e}")
+                    ipv4 = None
+                
                 cls._pool = psycopg2.pool.SimpleConnectionPool(
                     1,  # minconn
                     20,  # maxconn
                     host=host,
+                    hostaddr=ipv4,  # Forcer IPv4 pour éviter les problèmes IPv6
                     database=settings.SUPABASE_DB,
                     user=settings.SUPABASE_USER,
                     password=settings.SUPABASE_PASSWORD,
                     port=port,
-                    hostaddr=hostaddr if hostaddr else None,
-                    sslmode='require'  # Supabase requiert SSL
+                    sslmode="require",  # Supabase requiert SSL
                 )
                 if cls._pool:
-                    print(f"[OK] Pool de connexions PostgreSQL initialise (host {host}, port {port}, hostaddr {hostaddr})")
+                    print(
+                        f"[OK] Pool de connexions PostgreSQL initialise (host {host}, port {port}, hostaddr {hostaddr})"
+                    )
                 else:
                     print("[ERREUR] Echec de l'initialisation du pool")
             except Exception as e:
                 print(f"[ERREUR] Erreur lors de l'initialisation du pool : {e}")
                 raise
-    
+
     @classmethod
     def close(cls):
         """Ferme toutes les connexions du pool."""
         if cls._pool:
             cls._pool.closeall()
             print("[OK] Pool de connexions ferme")
-    
+
     @classmethod
     @contextmanager
     def get_connection(cls) -> Generator[psycopg2.extensions.connection, None, None]:
         """Obtient une connexion du pool (context manager)."""
         if cls._pool is None:
             cls.initialize()
-        
+
         if cls._pool is None:
             raise Exception("Pool de connexions non initialisé")
-        
+
         conn = None
         try:
             conn = cls._pool.getconn()
@@ -74,7 +86,7 @@ class Database:
         finally:
             if conn and cls._pool:
                 cls._pool.putconn(conn)
-    
+
     @classmethod
     @contextmanager
     def get_cursor(cls, commit: bool = False) -> Generator[RealDictCursor, None, None]:
@@ -94,4 +106,3 @@ class Database:
 
 # Initialisation lazy : le pool sera créé à la première utilisation
 # Cela évite de bloquer le démarrage si la DB n'est pas accessible immédiatement
-
