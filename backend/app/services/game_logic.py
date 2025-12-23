@@ -13,18 +13,32 @@ class GameLogic:
     def initialize_rangers() -> List[Dict[str, Any]]:
         """
         Initialise les 5 Rangers de base pour un joueur
+        Le Ranger Animaux (noir) est toujours en position 1
+        Les 4 autres Rangers sont mélangés aléatoirement dans les positions 2-5
         
         Returns:
             Liste des 5 Rangers avec leurs positions initiales (1-5)
         """
-        rangers = [
-            {"color": "blue", "name": "Ranger Bleu", "position": 1, "improved": False},
-            {"color": "black", "name": "Ranger Noir", "position": 2, "improved": False},
-            {"color": "orange", "name": "Ranger Orange", "position": 3, "improved": False},
-            {"color": "green", "name": "Ranger Vert", "position": 4, "improved": False},
-            {"color": "yellow", "name": "Ranger Jaune", "position": 5, "improved": False},
+        # Ranger Animaux (noir) toujours en position 1
+        animals_ranger = {"color": "black", "name": "Ranger Noir", "position": 1, "improved": False}
+        
+        # Les 4 autres Rangers à mélanger aléatoirement
+        other_rangers = [
+            {"color": "blue", "name": "Ranger Bleu", "position": 0, "improved": False},
+            {"color": "orange", "name": "Ranger Orange", "position": 0, "improved": False},
+            {"color": "green", "name": "Ranger Vert", "position": 0, "improved": False},
+            {"color": "yellow", "name": "Ranger Jaune", "position": 0, "improved": False},
         ]
-        return rangers
+        
+        # Mélanger aléatoirement les 4 autres Rangers
+        random.shuffle(other_rangers)
+        
+        # Assigner les positions 2-5 aux Rangers mélangés
+        for i, ranger in enumerate(other_rangers, start=2):
+            ranger["position"] = i
+        
+        # Retourner tous les Rangers : Animaux en 1, puis les 4 autres mélangés
+        return [animals_ranger] + other_rangers
     
     @staticmethod
     def initialize_game(game_id: int, players: List[Dict[str, Any]]) -> Dict[str, Any]:
