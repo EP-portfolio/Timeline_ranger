@@ -54,11 +54,21 @@ class Database:
         if cls._pool is None:
             cls.initialize()
         
-        conn = cls._pool.getconn()
+        if cls._pool is None:
+            raise Exception("Pool de connexions non initialisé")
+        
+        conn = None
         try:
+            conn = cls._pool.getconn()
+            if conn is None:
+                raise Exception("Impossible d'obtenir une connexion du pool")
             yield conn
+        except Exception as e:
+            print(f"[ERREUR] Erreur lors de l'obtention de la connexion : {e}")
+            raise
         finally:
-            cls._pool.putconn(conn)
+            if conn and cls._pool:
+                cls._pool.putconn(conn)
     
     @classmethod
     @contextmanager
