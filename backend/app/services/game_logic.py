@@ -73,32 +73,43 @@ class GameLogic:
         # - troupe : Cartes Troupes (ex-Animaux) → Ranger Noir
         # - technology : Cartes Technologies (ex-Mécènes) → Ranger Bleu
         # - quete : Cartes Quêtes (ex-Projets de Conservation) → Ranger Vert
+        
+        # Dictionnaire associant chaque type à ses noms spécifiques
+        card_names_by_type = {
+            "troupe": [
+                "Explosif - Lion",
+                "Explosif - Tigre",
+                "Explosif - Ours",
+                "Munition - Aigle",
+                "Munition - Loup",
+                "Munition - Renard",
+            ],
+            "technology": [
+                "Système - Armure",
+                "Système - Bouclier",
+                "Système - Laser",
+                "Système - Radar",
+                "Système - Propulseur",
+                "Système - Réacteur",
+                "Renfort - Fondation",
+                "Blindage - Avancé",
+            ],
+            "quete": [
+                "Quête - Diversité d'Armes",
+                "Quête - Maîtrise Tactique",
+                "Quête - Forteresse",
+                "Quête - Environnement",
+                "Quête - Programme",
+            ],
+        }
+        
         card_types = ["troupe", "technology", "quete"]
-        card_names = [
-            # Troupes (Ranger Noir)
-            "Explosif - Lion",
-            "Explosif - Tigre",
-            "Explosif - Ours",
-            "Munition - Aigle",
-            "Munition - Loup",
-            "Munition - Renard",
-            # Technologies (Ranger Bleu)
-            "Technologie - Armure",
-            "Technologie - Bouclier",
-            "Technologie - Laser",
-            "Technologie - Radar",
-            "Technologie - Propulseur",
-            "Technologie - Réacteur",
-            # Quêtes (Ranger Vert)
-            "Quête - Diversité d'Armes",
-            "Quête - Maîtrise Tactique",
-            "Quête - Forteresse",
-        ]
 
         cards = []
         for i in range(count):
             card_type = random.choice(card_types)
-            card_name = random.choice(card_names)
+            # Choisir un nom qui correspond au type sélectionné
+            card_name = random.choice(card_names_by_type[card_type])
             cards.append(
                 {
                     "id": f"card_{i}_{random.randint(1000, 9999)}",
