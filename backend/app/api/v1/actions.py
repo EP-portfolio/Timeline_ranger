@@ -4,11 +4,14 @@ Routes pour les actions de jeu
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Dict, Any
+import random
+import json
 from app.schemas.action import (
     PlayColorActionRequest,
     PlayCardActionRequest,
     PassActionRequest,
     SelectInitialHandRequest,
+    ExchangeCardForXTokenRequest,
     GameActionResponse,
     GameStateResponse,
     ColorAction,
@@ -16,7 +19,6 @@ from app.schemas.action import (
 from app.models.game import GameModel, GamePlayerModel
 from app.api.v1.auth import get_current_user
 from app.services.game_logic import GameLogic
-import json
 
 router = APIRouter(prefix="/games", tags=["actions"])
 
