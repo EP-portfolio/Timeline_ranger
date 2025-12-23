@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     SUPABASE_PASSWORD: str
     SUPABASE_PORT: str = "6543"  # Port du Connection Pooler (recommandé pour production)
     # Alternative: "5432" pour connexion directe (nécessite whitelist IP dans Supabase)
+    # ⚠️ IMPORTANT: Utiliser 6543 pour éviter les problèmes de connexion réseau
     
     # JWT Authentication
     SECRET_KEY: str = "changez-moi-en-production-avec-une-cle-secrete-forte"
