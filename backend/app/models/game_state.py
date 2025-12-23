@@ -12,12 +12,20 @@ class GameStateModel:
     @staticmethod
     def create(game_id: int, state_data: Dict[str, Any], turn_number: int = 0, current_player: Optional[int] = None) -> dict:
         """Crée un nouvel état de partie."""
+        try:
+            # S'assurer que state_data est sérialisable en JSON
+            json_str = json.dumps(state_data, default=str)  # default=str pour gérer les objets non sérialisables
+        except (TypeError, ValueError) as e:
+            print(f"[ERREUR] Erreur de sérialisation JSON pour game_id {game_id}: {e}")
+            print(f"[DEBUG] Type de state_data: {type(state_data)}")
+            raise ValueError(f"Impossible de sérialiser l'état du jeu en JSON: {e}")
+        
         with Database.get_cursor(commit=True) as cur:
             cur.execute("""
                 INSERT INTO game_states (game_id, turn_number, current_player, state_data)
                 VALUES (%s, %s, %s, %s)
                 RETURNING id, game_id, turn_number, current_player, state_data, created_at
-            """, (game_id, turn_number, current_player, json.dumps(state_data)))
+            """, (game_id, turn_number, current_player, json_str))
             result = cur.fetchone()
             return dict(result) if result else None
     
