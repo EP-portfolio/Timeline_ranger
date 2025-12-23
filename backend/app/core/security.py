@@ -8,7 +8,13 @@ from passlib.context import CryptContext
 from app.core.config import settings
 
 # Contexte pour le hashage des mots de passe
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Utiliser bcrypt directement pour éviter les problèmes de compatibilité avec passlib
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto",
+    bcrypt__ident="2b",  # Utiliser l'identifiant 2b (plus récent)
+    bcrypt__rounds=12,  # Nombre de rounds
+)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
