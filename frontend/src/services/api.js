@@ -62,7 +62,10 @@ api.interceptors.response.use(
 // Auth
 export const authAPI = {
   register: (data) => api.post('/auth/register', data),
-  login: (data) => api.post('/auth/login', data),
+  login: (formData) =>
+    api.post('/auth/login', formData, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    }),
   getCurrentUser: () => api.get('/auth/me'),
 }
 

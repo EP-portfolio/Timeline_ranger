@@ -38,7 +38,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const formData = new FormData()
+      // OAuth2 Password Flow attend du x-www-form-urlencoded
+      const formData = new URLSearchParams()
       formData.append('username', email) // OAuth2 utilise 'username' pour l'email
       formData.append('password', password)
 
