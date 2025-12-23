@@ -39,23 +39,38 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register(user_data: UserCreate):
     """Inscription d'un nouvel utilisateur."""
-    # Vérifier si l'email existe déjà
-    existing_user = UserModel.get_by_email(user_data.email)
-    if existing_user:
+    try:
+        # Vérifier si l'email existe déjà
+        existing_user = UserModel.get_by_email(user_data.email)
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cet email est déjà utilisé"
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERREUR] Erreur lors de la vérification de l'email : {e}")
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Cet email est déjà utilisé"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erreur de connexion à la base de données : {str(e)}"
         )
     
-    # Créer l'utilisateur
-    password_hash = get_password_hash(user_data.password)
-    user = UserModel.create(
-        email=user_data.email,
-        password_hash=password_hash,
-        username=user_data.username
-    )
-    
-    return user
+    try:
+        # Créer l'utilisateur
+        password_hash = get_password_hash(user_data.password)
+        user = UserModel.create(
+            email=user_data.email,
+            password_hash=password_hash,
+            username=user_data.username
+        )
+        return user
+    except Exception as e:
+        print(f"[ERREUR] Erreur lors de la création de l'utilisateur : {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erreur lors de l'inscription : {str(e)}"
+        )
 
 
 @router.post("/login", response_model=Token)
