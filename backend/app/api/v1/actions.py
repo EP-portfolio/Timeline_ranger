@@ -41,25 +41,58 @@ def get_game_state(game_id: int) -> Dict[str, Any]:
     # Récupérer les joueurs
     players = GamePlayerModel.list_by_game(game_id)
     
-    # Si la partie n'est pas démarrée, retourner un état minimal pour la salle d'attente
+    # Si la partie n'est pas démarrée, retourner un état avec les Rangers initialisés
+    # pour permettre la visualisation de l'interface même sans démarrer la partie
     if game["status"] != "started":
-        # Retourner un état minimal pour la salle d'attente
-        return {
+        from app.services.game_logic import GameLogic
+        
+        # Initialiser un état minimal avec les Rangers
+        minimal_state = {
             "game_id": game_id,
             "status": "waiting",
             "turn_number": 0,
             "current_player": None,
             "player_order": [p["player_number"] for p in players],
-            "players": {
-                p["player_number"]: {
-                    "player_id": p["id"],
-                    "user_id": p["user_id"],
-                    "player_number": p["player_number"],
-                    "armure_meca_id": p.get("armure_meca_id"),
-                }
-                for p in players
-            }
+            "players": {}
         }
+        
+        # Initialiser les Rangers et les ressources pour chaque joueur
+        rangers = GameLogic.initialize_rangers()
+        for p in players:
+            minimal_state["players"][p["player_number"]] = {
+                "player_id": p["id"],
+                "user_id": p["user_id"],
+                "player_number": p["player_number"],
+                "armure_meca_id": p.get("armure_meca_id"),
+                "rangers": [r.copy() for r in rangers],  # Copie pour chaque joueur
+                "resources": {
+                    "or": 0,
+                    "titanium": 0,
+                    "platine": 0,
+                    "vibranium": 0,
+                    "carbone": 0,
+                    "kevlar": 0,
+                },
+                "scores": {
+                    "points_degats": 0,
+                    "lasers": 0,
+                    "reputation": 0,
+                    "paires_ailes": 0,
+                },
+                "emissaires": 1,  # Émissaire de départ
+                "board": {
+                    "garnisons": [],
+                    "weapon_slots": [],
+                    "weapons": [],
+                    "armor_pieces": [],
+                    "lasers": [],
+                },
+                "hand": [],
+                "x_tokens": 0,
+                "last_breath_cards": [],
+            }
+        
+        return minimal_state
     
     # Essayer de récupérer l'état depuis la base de données
     saved_state = GameStateModel.get_latest(game_id)

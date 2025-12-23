@@ -9,12 +9,14 @@ const GameRoom = () => {
   const { id } = useParams()
   const { user } = useAuth()
   const [gameState, setGameState] = useState(null)
+  const [gameInfo, setGameInfo] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [wsConnected, setWsConnected] = useState(false)
 
   useEffect(() => {
     loadGameState()
+    loadGameInfo()
 
     // Connexion WebSocket
     const token = localStorage.getItem('token')
@@ -72,6 +74,27 @@ const GameRoom = () => {
     }
   }
 
+  const loadGameInfo = async () => {
+    try {
+      // Récupérer les infos de la partie pour savoir si on est l'hôte
+      const response = await gamesAPI.get(id)
+      setGameInfo(response.data)
+    } catch (error) {
+      console.error('Erreur chargement infos partie:', error)
+    }
+  }
+
+  const handleStartGame = async () => {
+    try {
+      await gamesAPI.start(id)
+      loadGameState() // Recharger l'état après démarrage
+      loadGameInfo()
+    } catch (error) {
+      console.error('Erreur démarrage partie:', error)
+      alert(error.response?.data?.detail || 'Erreur lors du démarrage de la partie')
+    }
+  }
+
   const handlePlayColor = async (color, power) => {
     try {
       const response = await actionsAPI.playColor(id, {
@@ -109,28 +132,8 @@ const GameRoom = () => {
     return <div className="game-room-error">État du jeu non disponible</div>
   }
 
-  // Si la partie n'est pas démarrée, afficher la salle d'attente
-  if (gameState.status === 'waiting') {
-    return (
-      <div className="game-room">
-        <header className="game-room-header">
-          <h1>Partie {id}</h1>
-          <div className="connection-status">
-            <span className={wsConnected ? 'connected' : 'disconnected'}>
-              {wsConnected ? '🟢 Connecté' : '🔴 Déconnecté'}
-            </span>
-          </div>
-        </header>
-        <div className="game-room-content">
-          <div className="waiting-room">
-            <h2>Salle d'attente</h2>
-            <p>Joueurs: {Object.keys(gameState.players || {}).length}</p>
-            <p>En attente du démarrage de la partie...</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  // Note: On affiche l'interface même si la partie est en "waiting"
+  // pour permettre la visualisation des Rangers et de l'interface
 
   const currentPlayerState = gameState.players?.[gameState.current_player]
   const myPlayerState = Object.values(gameState.players || {}).find(
@@ -142,10 +145,20 @@ const GameRoom = () => {
     <div className="game-room">
       <header className="game-room-header">
         <h1>Partie {id}</h1>
-        <div className="connection-status">
-          <span className={wsConnected ? 'connected' : 'disconnected'}>
-            {wsConnected ? '🟢 Connecté' : '🔴 Déconnecté'}
-          </span>
+        <div className="header-right">
+          {gameState?.status === 'waiting' && gameInfo?.host_id === user?.id && (
+            <button onClick={handleStartGame} className="start-game-button">
+              Démarrer la Partie
+            </button>
+          )}
+          {gameState?.status === 'waiting' && (
+            <span className="waiting-badge">⏳ En attente</span>
+          )}
+          <div className="connection-status">
+            <span className={wsConnected ? 'connected' : 'disconnected'}>
+              {wsConnected ? '🟢 Connecté' : '🔴 Déconnecté'}
+            </span>
+          </div>
         </div>
       </header>
 
@@ -249,7 +262,7 @@ const GameRoom = () => {
                   <div className="ranger-position">Position {ranger.position}</div>
                   {ranger.improved && <div className="ranger-improved">★ Amélioré</div>}
                 </div>
-                {isMyTurn && (
+                {gameState?.status === 'started' && isMyTurn && (
                   <button
                     onClick={() => handlePlayColor(ranger.color, ranger.position)}
                     className="play-action-button"
@@ -258,6 +271,11 @@ const GameRoom = () => {
                     Jouer (Niveau {ranger.position})
                   </button>
                 )}
+                {gameState?.status === 'waiting' && (
+                  <div className="play-action-button disabled">
+                    En attente du démarrage
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -265,7 +283,9 @@ const GameRoom = () => {
 
         {/* Actions */}
         <div className="actions-section">
-          {isMyTurn ? (
+          {gameState?.status === 'waiting' ? (
+            <p className="waiting">La partie n'a pas encore démarré. {gameInfo?.host_id === user?.id ? 'Cliquez sur "Démarrer la Partie" pour commencer.' : 'En attente du démarrage...'}</p>
+          ) : isMyTurn ? (
             <button onClick={handlePass} className="pass-button">
               Passer mon Tour
             </button>

@@ -142,10 +142,10 @@ async def start_game(
             detail="La partie a déjà été démarrée"
         )
     
-    if game["current_players"] < 2:
+    if game["current_players"] < 1:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Il faut au moins 2 joueurs pour démarrer"
+            detail="Il faut au moins 1 joueur pour démarrer"
         )
     
     # Initialiser l'état du jeu

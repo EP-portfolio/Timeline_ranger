@@ -10,6 +10,22 @@ class GameLogic:
     """Classe pour gérer la logique métier du jeu"""
     
     @staticmethod
+    def initialize_rangers() -> List[Dict[str, Any]]:
+        """
+        Initialise les 5 Rangers de base pour un joueur
+        
+        Returns:
+            Liste des 5 Rangers avec leurs positions initiales
+        """
+        return [
+            {"color": "blue", "name": "Ranger Bleu", "position": 1, "improved": False},
+            {"color": "black", "name": "Ranger Noir", "position": 1, "improved": False},
+            {"color": "orange", "name": "Ranger Orange", "position": 1, "improved": False},
+            {"color": "green", "name": "Ranger Vert", "position": 1, "improved": False},
+            {"color": "yellow", "name": "Ranger Jaune", "position": 1, "improved": False},
+        ]
+    
+    @staticmethod
     def initialize_game(game_id: int, players: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
         Initialise une nouvelle partie
@@ -25,13 +41,10 @@ class GameLogic:
         # Pour le POC, on simplifie : chaque joueur reçoit 4 cartes aléatoires
         
         # Initialiser les Rangers (5 cartes Action) pour chaque joueur
-        rangers = [
-            {"color": "blue", "name": "Ranger Bleu", "position": 1, "improved": False},
-            {"color": "black", "name": "Ranger Noir", "position": 2, "improved": False},
-            {"color": "orange", "name": "Ranger Orange", "position": 3, "improved": False},
-            {"color": "green", "name": "Ranger Vert", "position": 4, "improved": False},
-            {"color": "yellow", "name": "Ranger Jaune", "position": 5, "improved": False},
-        ]
+        rangers = GameLogic.initialize_rangers()
+        # Mettre les Rangers aux positions initiales (1-5)
+        for i, ranger in enumerate(rangers, start=1):
+            ranger["position"] = i
         
         # Initialiser l'état pour chaque joueur
         players_state = {}
