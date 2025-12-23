@@ -140,7 +140,7 @@ const GameRoom = () => {
       alert('Vous devez sélectionner une carte Quête pour jouer l\'action Association')
       return
     }
-    
+
     // Action Bleue peut être jouée avec ou sans carte (technologie ou crédits)
     // Les autres actions (Orange, Jaune) ne nécessitent pas de carte
 
@@ -297,13 +297,18 @@ const GameRoom = () => {
 
             {/* Zone centrale : Image de la Map/Armure */}
             <div className="map-armor-section">
-              <div className="map-armor-placeholder">
-                <p>IMAGE DE LA MAP/ARMURE</p>
-                {myPlayerState?.board && (
-                  <div className="board-info">
-                    <p>Garnisons: {myPlayerState.board.garnisons?.length || 0}</p>
-                    <p>Armes: {myPlayerState.board.weapons?.length || 0}</p>
-                    <p>Pièces d'armure: {myPlayerState.board.armor_pieces?.length || 0}</p>
+              <div className="hex-grid-container">
+                {myPlayerState?.board?.grid?.hexagons ? (
+                  <HexGrid 
+                    hexagons={myPlayerState.board.grid.hexagons}
+                    garnisons={myPlayerState.board.garnisons || []}
+                    weapons={myPlayerState.board.weapons || []}
+                    tokens={myPlayerState.board.tokens || []}
+                    specialZones={myPlayerState.board.special_zones || []}
+                  />
+                ) : (
+                  <div className="map-armor-placeholder">
+                    <p>Chargement de la grille...</p>
                   </div>
                 )}
               </div>
