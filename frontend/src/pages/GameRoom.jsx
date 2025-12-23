@@ -139,6 +139,35 @@ const GameRoom = () => {
     }
   }
 
+  const handleCardSelect = (cardId) => {
+    if (!myPlayerState?.initial_hand || myPlayerState.hand_selected) return
+    
+    setSelectedCards(prev => {
+      if (prev.includes(cardId)) {
+        return prev.filter(id => id !== cardId)
+      } else if (prev.length < 4) {
+        return [...prev, cardId]
+      }
+      return prev
+    })
+  }
+
+  const handleConfirmHandSelection = async () => {
+    if (selectedCards.length !== 4) {
+      alert('Vous devez sélectionner exactement 4 cartes')
+      return
+    }
+    
+    try {
+      await actionsAPI.selectInitialHand(id, { selected_card_ids: selectedCards })
+      setSelectedCards([])
+      loadGameState()
+    } catch (error) {
+      console.error('Erreur sélection cartes:', error)
+      alert(error.response?.data?.detail || 'Erreur lors de la sélection des cartes')
+    }
+  }
+
   if (loading) {
     return <div className="game-room-loading">Chargement...</div>
   }
