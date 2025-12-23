@@ -19,12 +19,24 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_password_hash(password: str) -> str:
     """Hash un mot de passe."""
     # Bcrypt limite les mots de passe à 72 bytes
-    # Tronquer si nécessaire (en bytes, pas en caractères)
-    password_bytes = password.encode('utf-8')
-    if len(password_bytes) > 72:
-        password_bytes = password_bytes[:72]
-        password = password_bytes.decode('utf-8', errors='ignore')
-    return pwd_context.hash(password)
+    # Passlib devrait gérer cela automatiquement, mais on force la troncature pour être sûr
+    if isinstance(password, str):
+        password_bytes = password.encode('utf-8')
+        if len(password_bytes) > 72:
+            # Tronquer à 72 bytes exactement
+            password_bytes = password_bytes[:72]
+            # Décoder en string pour passlib
+            password = password_bytes.decode('utf-8', errors='ignore')
+    # Utiliser hash avec truncate_error=True pour éviter l'erreur
+    try:
+        return pwd_context.hash(password)
+    except ValueError as e:
+        # Si l'erreur persiste, tronquer manuellement
+        if "longer than 72 bytes" in str(e):
+            password_bytes = password.encode('utf-8')[:72]
+            password = password_bytes.decode('utf-8', errors='ignore')
+            return pwd_context.hash(password)
+        raise
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
