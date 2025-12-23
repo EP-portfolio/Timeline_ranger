@@ -15,15 +15,16 @@ class GameLogic:
         Initialise les 5 Rangers de base pour un joueur
         
         Returns:
-            Liste des 5 Rangers avec leurs positions initiales
+            Liste des 5 Rangers avec leurs positions initiales (1-5)
         """
-        return [
+        rangers = [
             {"color": "blue", "name": "Ranger Bleu", "position": 1, "improved": False},
-            {"color": "black", "name": "Ranger Noir", "position": 1, "improved": False},
-            {"color": "orange", "name": "Ranger Orange", "position": 1, "improved": False},
-            {"color": "green", "name": "Ranger Vert", "position": 1, "improved": False},
-            {"color": "yellow", "name": "Ranger Jaune", "position": 1, "improved": False},
+            {"color": "black", "name": "Ranger Noir", "position": 2, "improved": False},
+            {"color": "orange", "name": "Ranger Orange", "position": 3, "improved": False},
+            {"color": "green", "name": "Ranger Vert", "position": 4, "improved": False},
+            {"color": "yellow", "name": "Ranger Jaune", "position": 5, "improved": False},
         ]
+        return rangers
     
     @staticmethod
     def initialize_game(game_id: int, players: List[Dict[str, Any]]) -> Dict[str, Any]:
