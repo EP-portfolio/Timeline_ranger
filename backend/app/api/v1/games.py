@@ -51,6 +51,21 @@ async def get_game(game_code: str):
     return game
 
 
+@router.get("/by-id/{game_id}", response_model=GameResponse)
+async def get_game_by_id(
+    game_id: int,
+    current_user: dict = Depends(get_current_user)
+):
+    """Récupère une partie par ID."""
+    game = GameModel.get_by_id(game_id)
+    if not game:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Partie non trouvée"
+        )
+    return game
+
+
 @router.post("/join", response_model=GamePlayerResponse)
 async def join_game(
     join_data: GameJoinRequest,

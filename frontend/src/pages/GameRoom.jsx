@@ -94,8 +94,8 @@ const GameRoom = () => {
 
   const loadGameInfo = async () => {
     try {
-      // Récupérer les infos de la partie pour savoir si on est l'hôte
-      const response = await gamesAPI.get(id)
+      // Récupérer les infos de la partie par ID pour savoir si on est l'hôte
+      const response = await gamesAPI.getById(id)
       setGameInfo(response.data)
     } catch (error) {
       console.error('Erreur chargement infos partie:', error)
