@@ -4,53 +4,40 @@ Sécurité : hashage de mots de passe et JWT
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
 from app.core.config import settings
-
-# Contexte pour le hashage des mots de passe
-# Utiliser bcrypt directement pour éviter les problèmes de compatibilité avec passlib
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto",
-    bcrypt__ident="2b",  # Utiliser l'identifiant 2b (plus récent)
-    bcrypt__rounds=12,  # Nombre de rounds
-)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Vérifie un mot de passe en clair contre un hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    # Utiliser bcrypt directement pour éviter les problèmes de compatibilité avec passlib
+    try:
+        password_bytes = plain_password.encode('utf-8')
+        # Tronquer à 72 bytes si nécessaire
+        if len(password_bytes) > 72:
+            password_bytes = password_bytes[:72]
+        return bcrypt.checkpw(password_bytes, hashed_password.encode('utf-8'))
+    except Exception as e:
+        print(f"[ERREUR] Erreur lors de la vérification du mot de passe: {e}")
+        return False
 
 
 def get_password_hash(password: str) -> str:
-    """Hash un mot de passe."""
-    # Log pour debug
-    password_len = len(password) if password else 0
-    password_bytes_len = len(password.encode('utf-8')) if password else 0
-    print(f"[DEBUG] Hash password - longueur: {password_len} caractères, {password_bytes_len} bytes")
-    
+    """Hash un mot de passe avec bcrypt."""
     # Bcrypt limite les mots de passe à 72 bytes
-    # Tronquer si nécessaire (en bytes, pas en caractères)
-    if password:
-        password_bytes = password.encode('utf-8')
-        if len(password_bytes) > 72:
-            print(f"[WARN] Mot de passe trop long ({len(password_bytes)} bytes), troncature à 72 bytes")
-            password_bytes = password_bytes[:72]
-            password = password_bytes.decode('utf-8', errors='ignore')
+    password_bytes = password.encode('utf-8')
     
-    try:
-        return pwd_context.hash(password)
-    except ValueError as e:
-        error_msg = str(e)
-        print(f"[ERREUR] Erreur lors du hashage: {error_msg}")
-        # Si l'erreur mentionne 72 bytes, forcer la troncature
-        if "72 bytes" in error_msg or "longer than" in error_msg.lower():
-            if password:
-                password_bytes = password.encode('utf-8')[:72]
-                password = password_bytes.decode('utf-8', errors='ignore')
-                print(f"[DEBUG] Nouvelle tentative avec mot de passe tronqué: {len(password.encode('utf-8'))} bytes")
-                return pwd_context.hash(password)
-        raise
+    # Tronquer à 72 bytes si nécessaire
+    if len(password_bytes) > 72:
+        print(f"[WARN] Mot de passe trop long ({len(password_bytes)} bytes), troncature à 72 bytes")
+        password_bytes = password_bytes[:72]
+    
+    # Générer le salt et hasher
+    salt = bcrypt.gensalt(rounds=12)
+    hashed = bcrypt.hashpw(password_bytes, salt)
+    
+    # Retourner en string
+    return hashed.decode('utf-8')
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
