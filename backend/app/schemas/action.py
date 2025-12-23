@@ -67,6 +67,7 @@ class PlaceConstructionRequest(BaseModel):
     anchor_q: int = Field(..., description="Colonne d'ancrage (q)")
     anchor_r: int = Field(..., description="Position dans la colonne d'ancrage (r)")
     rotation: int = Field(default=0, ge=-6, le=6, description="Rotation en multiples de 60° (positif = droite, négatif = gauche)")
+    finish_construction_turn: bool = Field(default=False, description="Terminer le tour de construction (pour Ranger amélioré)")
 
 
 class GameActionResponse(BaseModel):

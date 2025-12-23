@@ -295,12 +295,19 @@ async def play_color_action(
         # L'action Construction ne place pas directement la construction
         # Elle permet au joueur de choisir une tuile et de la placer
         # Le placement se fait via l'endpoint /place-construction
-        # Ici, on marque juste que l'action Construction a été jouée
-        # Le joueur pourra ensuite utiliser get_construction_tiles et place_construction
-        if action.action_data:
-            # L'action Construction a été sélectionnée, le joueur peut maintenant placer une tuile
-            # Le placement se fera via l'endpoint séparé /place-construction
-            pass
+        # Initialiser les données du tour de construction
+        orange_ranger = next(
+            (r for r in player_state["rangers"] if r["color"] == "orange"), None
+        )
+        is_improved = orange_ranger.get("improved", False) if orange_ranger else False
+        
+        # Initialiser les données du tour de construction
+        player_state["construction_turn_data"] = {
+            "action_power": action.power,
+            "constructions_placed": [],  # Liste des tailles construites dans ce tour
+            "total_size_used": 0,
+            "is_improved": is_improved,  # Ranger amélioré ou non
+        }
 
     elif action.color == ColorAction.GREEN:
         # Action Association

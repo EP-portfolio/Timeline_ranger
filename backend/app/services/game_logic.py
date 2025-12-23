@@ -263,10 +263,10 @@ class GameLogic:
     def get_available_construction_tiles(max_size: int) -> List[Dict[str, Any]]:
         """
         Retourne les tuiles de construction disponibles selon la taille maximale
-        
+
         Args:
             max_size: Taille maximale (niveau de l'action Construction)
-        
+
         Returns:
             Liste des tuiles de construction disponibles (taille <= max_size)
         """
@@ -289,7 +289,10 @@ class GameLogic:
                     "size": 2,
                     "name": "Tuile Ligne 2",
                     "shape": "line",
-                    "hexagons": [{"q": 0, "r": 0}, {"q": 0, "r": 1}],  # 2 hexagones en ligne verticale
+                    "hexagons": [
+                        {"q": 0, "r": 0},
+                        {"q": 0, "r": 1},
+                    ],  # 2 hexagones en ligne verticale
                     "cost": 4,
                 }
             ],
@@ -299,7 +302,11 @@ class GameLogic:
                     "size": 3,
                     "name": "Tuile Ligne 3",
                     "shape": "line",
-                    "hexagons": [{"q": 0, "r": 0}, {"q": 0, "r": 1}, {"q": 0, "r": 2}],  # 3 hexagones en ligne
+                    "hexagons": [
+                        {"q": 0, "r": 0},
+                        {"q": 0, "r": 1},
+                        {"q": 0, "r": 2},
+                    ],  # 3 hexagones en ligne
                     "cost": 6,
                 },
                 {
@@ -307,9 +314,13 @@ class GameLogic:
                     "size": 3,
                     "name": "Tuile L",
                     "shape": "L",
-                    "hexagons": [{"q": 0, "r": 0}, {"q": 0, "r": 1}, {"q": 1, "r": 1}],  # Forme L
+                    "hexagons": [
+                        {"q": 0, "r": 0},
+                        {"q": 0, "r": 1},
+                        {"q": 1, "r": 1},
+                    ],  # Forme L
                     "cost": 6,
-                }
+                },
             ],
             4: [
                 {
@@ -317,7 +328,12 @@ class GameLogic:
                     "size": 4,
                     "name": "Tuile Ligne 4",
                     "shape": "line",
-                    "hexagons": [{"q": 0, "r": 0}, {"q": 0, "r": 1}, {"q": 0, "r": 2}, {"q": 0, "r": 3}],
+                    "hexagons": [
+                        {"q": 0, "r": 0},
+                        {"q": 0, "r": 1},
+                        {"q": 0, "r": 2},
+                        {"q": 0, "r": 3},
+                    ],
                     "cost": 8,
                 },
                 {
@@ -325,7 +341,12 @@ class GameLogic:
                     "size": 4,
                     "name": "Tuile Carré",
                     "shape": "square",
-                    "hexagons": [{"q": 0, "r": 0}, {"q": 1, "r": 0}, {"q": 0, "r": 1}, {"q": 1, "r": 1}],
+                    "hexagons": [
+                        {"q": 0, "r": 0},
+                        {"q": 1, "r": 0},
+                        {"q": 0, "r": 1},
+                        {"q": 1, "r": 1},
+                    ],
                     "cost": 8,
                 },
                 {
@@ -333,9 +354,14 @@ class GameLogic:
                     "size": 4,
                     "name": "Tuile T",
                     "shape": "T",
-                    "hexagons": [{"q": 0, "r": 0}, {"q": 0, "r": 1}, {"q": -1, "r": 1}, {"q": 1, "r": 1}],
+                    "hexagons": [
+                        {"q": 0, "r": 0},
+                        {"q": 0, "r": 1},
+                        {"q": -1, "r": 1},
+                        {"q": 1, "r": 1},
+                    ],
                     "cost": 8,
-                }
+                },
             ],
             5: [
                 {
@@ -343,7 +369,13 @@ class GameLogic:
                     "size": 5,
                     "name": "Tuile Ligne 5",
                     "shape": "line",
-                    "hexagons": [{"q": 0, "r": 0}, {"q": 0, "r": 1}, {"q": 0, "r": 2}, {"q": 0, "r": 3}, {"q": 0, "r": 4}],
+                    "hexagons": [
+                        {"q": 0, "r": 0},
+                        {"q": 0, "r": 1},
+                        {"q": 0, "r": 2},
+                        {"q": 0, "r": 3},
+                        {"q": 0, "r": 4},
+                    ],
                     "cost": 10,
                 },
                 {
@@ -351,38 +383,46 @@ class GameLogic:
                     "size": 5,
                     "name": "Tuile Croix",
                     "shape": "cross",
-                    "hexagons": [{"q": 0, "r": 0}, {"q": 0, "r": 1}, {"q": -1, "r": 1}, {"q": 1, "r": 1}, {"q": 0, "r": 2}],
+                    "hexagons": [
+                        {"q": 0, "r": 0},
+                        {"q": 0, "r": 1},
+                        {"q": -1, "r": 1},
+                        {"q": 1, "r": 1},
+                        {"q": 0, "r": 2},
+                    ],
                     "cost": 10,
-                }
-            ]
+                },
+            ],
         }
-        
+
         # Retourner toutes les tuiles de taille <= max_size
         available_tiles = []
         for size in range(1, max_size + 1):
             if size in all_tiles:
                 available_tiles.extend(all_tiles[size])
-        
+
         return available_tiles
 
     @staticmethod
-    def rotate_tile_hexagons(hexagons: List[Dict[str, int]], rotation: int) -> List[Dict[str, int]]:
+    def rotate_tile_hexagons(
+        hexagons: List[Dict[str, int]], rotation: int
+    ) -> List[Dict[str, int]]:
         """
         Fait pivoter une tuile d'un angle de 60° * rotation
         rotation = 1 : 60° vers la droite
         rotation = -1 : 60° vers la gauche
         rotation = 0 : pas de rotation
-        
+
         Args:
             hexagons: Liste des hexagones relatifs de la tuile
             rotation: Nombre de rotations (1 = droite, -1 = gauche, 0 = aucune)
-        
+
         Returns:
             Liste des hexagones après rotation
         """
         if rotation == 0:
             return hexagons
-        
+
         # Rotation hexagonale : conversion (q, r) avec matrice de rotation
         # Rotation de 60° vers la droite : (q', r') = (-r, q + r)
         # Rotation de 60° vers la gauche : (q', r') = (q + r, -q)
@@ -396,7 +436,7 @@ class GameLogic:
                 for _ in range(-rotation):
                     q, r = q + r, -q
             rotated.append({"q": q, "r": r})
-        
+
         return rotated
 
     @staticmethod
@@ -405,18 +445,18 @@ class GameLogic:
         tile_hexagons: List[Dict[str, int]],
         anchor_q: int,
         anchor_r: int,
-        existing_garnisons: List[Dict[str, Any]]
+        existing_garnisons: List[Dict[str, Any]],
     ) -> tuple[bool, str]:
         """
         Valide le placement d'une tuile sur la grille
-        
+
         Args:
             grid_hexagons: Tous les hexagones de la grille
             tile_hexagons: Hexagones relatifs de la tuile (après rotation)
             anchor_q: Colonne d'ancrage (position de référence)
             anchor_r: Position dans la colonne d'ancrage
             existing_garnisons: Garnisons déjà placées
-        
+
         Returns:
             (is_valid, error_message)
         """
@@ -426,24 +466,27 @@ class GameLogic:
             abs_q = anchor_q + hex_rel["q"]
             abs_r = anchor_r + hex_rel["r"]
             tile_positions.append((abs_q, abs_r))
-        
+
         # Vérifier que tous les hexagones de la tuile sont dans la grille
         grid_dict = {(h["q"], h["r"]): h for h in grid_hexagons}
-        
+
         for q, r in tile_positions:
             if (q, r) not in grid_dict:
                 return False, f"L'hexagone ({q}, {r}) est hors de la grille"
-            
+
             hex = grid_dict[(q, r)]
-            
+
             # Vérifier que l'hexagone est constructible
             if not hex.get("constructible", True):
-                return False, f"L'hexagone ({q}, {r}) n'est pas constructible (rocher ou eau)"
-            
+                return (
+                    False,
+                    f"L'hexagone ({q}, {r}) n'est pas constructible (rocher ou eau)",
+                )
+
             # Vérifier que l'hexagone n'est pas déjà occupé par une garnison
             if hex.get("garnison_id") is not None:
                 return False, f"L'hexagone ({q}, {r}) est déjà occupé par une garnison"
-        
+
         return True, "Placement valide"
 
     @staticmethod
