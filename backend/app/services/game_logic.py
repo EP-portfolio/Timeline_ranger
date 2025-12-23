@@ -208,41 +208,40 @@ class GameLogic:
         return cards
 
     @staticmethod
-    def initialize_board_grid(width: int = 10, height: int = 7) -> Dict[str, Any]:
+    def initialize_board_grid() -> Dict[str, Any]:
         """
         Initialise la grille hexagonale de base de l'armure méca
-
-        Args:
-            width: Largeur en hexagones (par défaut 10)
-            height: Hauteur en hexagones (par défaut 7)
+        La map est constituée de 9 colonnes contenant chacune 6 ou 7 emplacements
+        Les cases rocher et eau sont inconstructibles
 
         Returns:
             Dictionnaire contenant la grille hexagonale avec terrains par défaut
         """
         hexagons = []
 
+        # Structure : 9 colonnes (q = 0 à 8), chacune avec 6 ou 7 hexagones
+        # Les colonnes alternent entre 6 et 7 hexagones pour créer un motif hexagonal
+        column_sizes = [7, 6, 7, 6, 7, 6, 7, 6, 7]  # 9 colonnes
+
         # Générer tous les hexagones de la grille
         # Système de coordonnées hexagonales (q, r)
-        for r in range(height):
-            offset = r // 2  # Décalage pour les lignes impaires
-            for q in range(width - offset):
-                hex_q = q + offset
-                hex_r = r
-
-                # Déterminer le terrain par défaut selon la position
-                # Bordure = herbe, centre = terre craquelée
-                if q == 0 or q == width - 1 - offset or r == 0 or r == height - 1:
-                    terrain = "grass"  # Herbe sur les bords
-                else:
-                    terrain = "cracked_earth"  # Terre craquelée au centre
+        for q in range(9):  # 9 colonnes
+            column_size = column_sizes[q]
+            for r in range(column_size):
+                # Déterminer le terrain par défaut
+                # Par défaut : terre craquelée (constructible)
+                # Les cases rocher et eau seront définies selon la configuration de l'armure méca
+                terrain = "cracked_earth"  # Terre craquelée (constructible par défaut)
+                constructible = True  # Constructible par défaut
 
                 hexagons.append(
                     {
-                        "q": hex_q,
-                        "r": hex_r,
+                        "q": q,
+                        "r": r,
                         "x": 0,  # Sera calculé lors de l'affichage
                         "y": 0,  # Sera calculé lors de l'affichage
                         "terrain": terrain,
+                        "constructible": constructible,  # True = constructible, False = inconstructible (rocher/eau)
                         "tokens": [],
                         "special_zone": None,
                         "garnison_id": None,
@@ -251,8 +250,8 @@ class GameLogic:
                 )
 
         return {
-            "width": width,
-            "height": height,
+            "columns": 9,  # 9 colonnes
+            "column_sizes": column_sizes,  # Taille de chaque colonne
             "hexagons": hexagons,
         }
 
