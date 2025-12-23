@@ -42,10 +42,8 @@ class GameLogic:
         # Pour le POC, on simplifie : chaque joueur reçoit 4 cartes aléatoires
         
         # Initialiser les Rangers (5 cartes Action) pour chaque joueur
+        # Les Rangers sont déjà initialisés avec les positions 1-5
         rangers = GameLogic.initialize_rangers()
-        # Mettre les Rangers aux positions initiales (1-5)
-        for i, ranger in enumerate(rangers, start=1):
-            ranger["position"] = i
         
         # Initialiser l'état pour chaque joueur
         players_state = {}
