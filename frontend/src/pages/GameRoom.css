@@ -453,3 +453,108 @@
   margin: 0.5rem 0;
 }
 
+/* Sélection de cartes initiales */
+.initial-hand-selection {
+  background: #2a2a2a;
+  padding: 2rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.initial-hand-selection h3 {
+  color: #fff;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.card-item {
+  background: #1a1a1a;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 2px solid #444;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.card-item:hover {
+  border-color: #667eea;
+  transform: translateY(-2px);
+}
+
+.card-item.selected {
+  border-color: #10b981;
+  background: #1a3a2a;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+.card-name {
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-type {
+  color: #aaa;
+  font-size: 0.85rem;
+  text-transform: capitalize;
+  margin-bottom: 0.25rem;
+}
+
+.card-cost {
+  color: #eab308;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.card-size {
+  color: #3b82f6;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.confirm-hand-button {
+  width: 100%;
+  padding: 1rem;
+  background: #10b981;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.confirm-hand-button:hover:not(:disabled) {
+  background: #059669;
+}
+
+.confirm-hand-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Cartes en main */
+.hand-section {
+  background: #2a2a2a;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.hand-section h3 {
+  color: #fff;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+

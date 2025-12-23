@@ -86,6 +86,7 @@ export const actionsAPI = {
   playColor: (gameId, data) => api.post(`/games/${gameId}/actions/play-color`, data),
   playCard: (gameId, data) => api.post(`/games/${gameId}/actions/play-card`, data),
   pass: (gameId, data) => api.post(`/games/${gameId}/actions/pass`, data),
+  selectInitialHand: (gameId, data) => api.post(`/games/${gameId}/actions/select-initial-hand`, data),
 }
 
 export default api

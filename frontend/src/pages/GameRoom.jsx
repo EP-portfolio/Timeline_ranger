@@ -13,6 +13,7 @@ const GameRoom = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [wsConnected, setWsConnected] = useState(false)
+  const [selectedCards, setSelectedCards] = useState([])
 
   useEffect(() => {
     loadGameState()

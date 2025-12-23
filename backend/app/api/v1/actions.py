@@ -7,6 +7,7 @@ from app.schemas.action import (
     PlayColorActionRequest,
     PlayCardActionRequest,
     PassActionRequest,
+    SelectInitialHandRequest,
     GameActionResponse,
     GameStateResponse,
     ColorAction
@@ -388,5 +389,87 @@ async def get_game_state_endpoint(
         current_player=game_state["current_player"],
         players=players_list,
         game_data=game_state
+    )
+
+
+@router.post("/{game_id}/actions/select-initial-hand", response_model=GameActionResponse)
+async def select_initial_hand(
+    game_id: int,
+    selection: SelectInitialHandRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Sélectionne 4 cartes parmi les 8 initiales
+    """
+    # Vérifier que l'utilisateur est dans la partie
+    player = GamePlayerModel.get_by_game_and_user(game_id, current_user["id"])
+    if not player:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Vous n'êtes pas dans cette partie"
+        )
+    
+    # Récupérer l'état du jeu
+    game_state = get_game_state(game_id)
+    
+    # Vérifier que le joueur n'a pas déjà sélectionné
+    player_num = player["player_number"]
+    player_state = game_state["players"].get(player_num)
+    if not player_state:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"État du joueur {player_num} non trouvé"
+        )
+    
+    if player_state.get("hand_selected", False):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Vous avez déjà sélectionné vos cartes"
+        )
+    
+    # Vérifier que les cartes sélectionnées sont dans initial_hand
+    initial_hand = player_state.get("initial_hand", [])
+    initial_card_ids = {card["id"] for card in initial_hand}
+    selected_ids = set(selection.selected_card_ids)
+    
+    if not selected_ids.issubset(initial_card_ids):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Certaines cartes sélectionnées ne sont pas dans votre main initiale"
+        )
+    
+    if len(selected_ids) != 4:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Vous devez sélectionner exactement 4 cartes"
+        )
+    
+    # Sélectionner les 4 cartes
+    selected_cards = [card for card in initial_hand if card["id"] in selected_ids]
+    
+    # Mettre à jour l'état du joueur
+    player_state["hand"] = selected_cards
+    player_state["hand_selected"] = True
+    
+    # Sauvegarder l'état mis à jour
+    from app.models.game_state import GameStateModel
+    GameStateModel.update(
+        game_id=game_id,
+        state_data=game_state,
+        turn_number=game_state.get("turn_number", 1),
+        current_player=game_state.get("current_player")
+    )
+    
+    # Diffuser la mise à jour via WebSocket
+    from app.api.v1.websocket import broadcast_game_state_update_sync
+    try:
+        broadcast_game_state_update_sync(game_id, game_state)
+    except Exception as e:
+        print(f"Erreur broadcast WebSocket: {e}")
+    
+    return GameActionResponse(
+        success=True,
+        message="4 cartes sélectionnées avec succès",
+        game_state=game_state
     )
 

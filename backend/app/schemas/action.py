@@ -45,6 +45,11 @@ class PassActionRequest(BaseModel):
     reason: Optional[str] = Field(None, description="Raison du pass (optionnel)")
 
 
+class SelectInitialHandRequest(BaseModel):
+    """Requête pour sélectionner 4 cartes parmi les 8 initiales"""
+    selected_card_ids: List[str] = Field(..., min_items=4, max_items=4, description="IDs des 4 cartes sélectionnées")
+
+
 class GameActionResponse(BaseModel):
     """Réponse après une action"""
     success: bool = Field(..., description="Action réussie")
