@@ -134,7 +134,7 @@ const GameRoom = () => {
       alert('Vous devez sélectionner une carte Troupe pour jouer l\'action Animaux')
       return
     }
-    
+
     // Action Bleue peut être jouée avec ou sans carte
     // Les autres actions (Orange, Vert, Jaune) ne nécessitent pas de carte
 
@@ -152,7 +152,7 @@ const GameRoom = () => {
         selected_card_id: selectedCardFromHand || null,
         action_data: actionData,
       })
-      
+
       // Réinitialiser la sélection
       setSelectedAction(null)
       setSelectedCardFromHand(null)
@@ -171,20 +171,20 @@ const GameRoom = () => {
   // Filtrer les cartes jouables selon l'action sélectionnée
   const getPlayableCards = () => {
     if (!selectedAction || !myPlayerState?.hand) return []
-    
+
     const { color } = selectedAction
-    
+
     // Bleu (Mécène) : peut jouer des cartes Mécène ou gagner des crédits
     // Pour le POC, on considère toutes les cartes comme jouables avec bleu
     if (color === 'blue') {
       return myPlayerState.hand
     }
-    
+
     // Noir (Animaux) : peut jouer des cartes Troupe
     if (color === 'black') {
       return myPlayerState.hand.filter(card => card.type === 'troupe')
     }
-    
+
     // Orange, Vert, Jaune : pas de cartes à jouer pour l'instant
     return []
   }
@@ -408,6 +408,7 @@ const GameRoom = () => {
                   key={card.id}
                   className={`card-item ${selectedCards.includes(card.id) ? 'selected' : ''}`}
                   onClick={() => handleCardSelect(card.id)}
+                  style={{ backgroundColor: getCardColorByType(card.type) }}
                 >
                   <div className="card-name">{card.name}</div>
                   <div className="card-type">{card.type}</div>
@@ -430,10 +431,10 @@ const GameRoom = () => {
         {selectedAction && (
           <div className="card-selection-for-action">
             <h3>
-              Action {selectedAction.color === 'blue' ? 'Mécène' : 
-                      selectedAction.color === 'black' ? 'Animaux' :
-                      selectedAction.color === 'orange' ? 'Construction' :
-                      selectedAction.color === 'green' ? 'Association' : 'Cartes'} 
+              Action {selectedAction.color === 'blue' ? 'Mécène' :
+                selectedAction.color === 'black' ? 'Animaux' :
+                  selectedAction.color === 'orange' ? 'Construction' :
+                    selectedAction.color === 'green' ? 'Association' : 'Cartes'}
               (Niveau {selectedAction.power})
             </h3>
             <p className="selection-instruction">
@@ -443,7 +444,7 @@ const GameRoom = () => {
               {selectedAction.color === 'green' && 'Action Association (pas de carte nécessaire)'}
               {selectedAction.color === 'yellow' && 'Action Cartes (pas de carte nécessaire)'}
             </p>
-            
+
             {getPlayableCards().length > 0 && (
               <div className="playable-cards-section">
                 <h4>Cartes jouables :</h4>
@@ -453,6 +454,7 @@ const GameRoom = () => {
                       key={card.id}
                       className={`card-item ${selectedCardFromHand === card.id ? 'selected' : ''}`}
                       onClick={() => handleSelectCardFromHand(card.id)}
+                      style={{ backgroundColor: getCardColorByType(card.type) }}
                     >
                       <div className="card-name">{card.name}</div>
                       <div className="card-type">{card.type}</div>
@@ -538,6 +540,16 @@ function getColorHex(color) {
     yellow: '#eab308',
   }
   return colors[color] || '#666'
+}
+
+function getCardColorByType(cardType) {
+  // Mapping des types de cartes aux couleurs des Rangers
+  const cardTypeColors = {
+    troupe: '#1f2937',      // Noir - Ranger Animaux
+    technology: '#f97316',  // Orange - Ranger Construction
+    mecenes: '#3b82f6',     // Bleu - Ranger Mécène (si on a des cartes Mécène spécifiques)
+  }
+  return cardTypeColors[cardType] || '#2a2a2a' // Par défaut gris foncé
 }
 
 export default GameRoom
