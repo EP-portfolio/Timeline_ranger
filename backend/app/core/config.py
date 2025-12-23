@@ -20,7 +20,8 @@ class Settings(BaseSettings):
     SUPABASE_DB: str = "postgres"
     SUPABASE_USER: str = "postgres"
     SUPABASE_PASSWORD: str
-    SUPABASE_PORT: str = "5432"
+    SUPABASE_PORT: str = "6543"  # Port du Connection Pooler (recommandé pour production)
+    # Alternative: "5432" pour connexion directe (nécessite whitelist IP dans Supabase)
     
     # JWT Authentication
     SECRET_KEY: str = "changez-moi-en-production-avec-une-cle-secrete-forte"

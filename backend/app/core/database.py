@@ -20,6 +20,8 @@ class Database:
         """Initialise le pool de connexions."""
         if cls._pool is None:
             try:
+                # Utiliser le port du pooler (6543) ou port direct (5432)
+                port = int(settings.SUPABASE_PORT)
                 cls._pool = psycopg2.pool.SimpleConnectionPool(
                     1,  # minconn
                     20,  # maxconn
@@ -27,11 +29,11 @@ class Database:
                     database=settings.SUPABASE_DB,
                     user=settings.SUPABASE_USER,
                     password=settings.SUPABASE_PASSWORD,
-                    port=settings.SUPABASE_PORT,
+                    port=port,
                     sslmode='require'  # Supabase requiert SSL
                 )
                 if cls._pool:
-                    print("[OK] Pool de connexions PostgreSQL initialise")
+                    print(f"[OK] Pool de connexions PostgreSQL initialise (port {port})")
                 else:
                     print("[ERREUR] Echec de l'initialisation du pool")
             except Exception as e:
@@ -75,6 +77,6 @@ class Database:
                 cur.close()
 
 
-# Initialiser le pool au démarrage
-Database.initialize()
+# Initialisation lazy : le pool sera créé à la première utilisation
+# Cela évite de bloquer le démarrage si la DB n'est pas accessible immédiatement
 
