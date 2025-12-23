@@ -121,10 +121,24 @@ const GameRoom = () => {
     }
   }
 
-  const handlePlayColor = (color, power) => {
+  const handlePlayColor = async (color, power) => {
     // Au lieu de jouer directement, on sélectionne l'action pour afficher les cartes jouables
     setSelectedAction({ color, power })
     setSelectedCardFromHand(null)
+    
+    // Si c'est l'action Construction, charger les tuiles disponibles
+    if (color === 'orange') {
+      try {
+        const response = await actionsAPI.getConstructionTiles(id, power)
+        setAvailableTiles(response.data.tiles || [])
+        setSelectedTile(null)
+        setTileRotation(0)
+        setPreviewPosition(null)
+      } catch (error) {
+        console.error('Erreur chargement tuiles:', error)
+        alert(error.response?.data?.detail || 'Erreur lors du chargement des tuiles')
+      }
+    }
   }
 
   const handleSelectCardFromHand = (cardId) => {
@@ -493,21 +507,94 @@ const GameRoom = () => {
               </div>
             )}
 
-            <div className="action-confirm-buttons">
-              <button
-                onClick={handleConfirmActionWithCard}
-                className="confirm-action-button"
-                disabled={(selectedAction.color === 'black' || selectedAction.color === 'green') && !selectedCardFromHand}
-              >
-                Confirmer l'action
-              </button>
-              <button
-                onClick={handleCancelAction}
-                className="cancel-action-button"
-              >
-                Annuler
-              </button>
-            </div>
+            {/* Section spéciale pour l'action Construction */}
+            {selectedAction.color === 'orange' ? (
+              <div className="construction-section">
+                {/* Sélection de la tuile */}
+                {!selectedTile ? (
+                  <div className="tiles-selection">
+                    <h4>Tuiles disponibles (taille ≤ {selectedAction.power})</h4>
+                    {availableTiles.length > 0 ? (
+                      <div className="tiles-grid">
+                        {availableTiles.map((tile) => (
+                          <div
+                            key={tile.id}
+                            className="tile-preview"
+                            onClick={() => handleSelectTile(tile)}
+                          >
+                            <div className="tile-name">{tile.name}</div>
+                            <div className="tile-size">Taille: {tile.size}</div>
+                            <div className="tile-cost">Coût: {tile.cost} PO</div>
+                            <div className="tile-shape">Forme: {tile.shape}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p>Chargement des tuiles...</p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="tile-placement">
+                    <div className="selected-tile-info">
+                      <h4>Tuile sélectionnée: {selectedTile.name}</h4>
+                      <p>Taille: {selectedTile.size} | Coût: {selectedTile.cost} PO</p>
+                      <div className="rotation-controls">
+                        <button onClick={() => handleRotateTile(-1)} className="rotate-button">
+                          ↺ Gauche (-60°)
+                        </button>
+                        <span>Rotation: {tileRotation * 60}°</span>
+                        <button onClick={() => handleRotateTile(1)} className="rotate-button">
+                          ↻ Droite (+60°)
+                        </button>
+                      </div>
+                    </div>
+                    <p className="placement-instruction">
+                      Cliquez sur la grille pour choisir l'emplacement de la tuile
+                    </p>
+                    {previewPosition && (
+                      <div className="placement-confirm">
+                        <p>Position: ({previewPosition.q}, {previewPosition.r})</p>
+                        <button
+                          onClick={handlePlaceConstruction}
+                          className="confirm-placement-button"
+                        >
+                          Valider le placement ({selectedTile.cost} PO)
+                        </button>
+                      </div>
+                    )}
+                    <button
+                      onClick={() => {
+                        setSelectedTile(null)
+                        setTileRotation(0)
+                        setPreviewPosition(null)
+                      }}
+                      className="cancel-tile-button"
+                    >
+                      Choisir une autre tuile
+                    </button>
+                  </div>
+                )}
+                <button onClick={handleCancelAction} className="cancel-action-button">
+                  Annuler l'action
+                </button>
+              </div>
+            ) : (
+              <div className="action-confirm-buttons">
+                <button
+                  onClick={handleConfirmActionWithCard}
+                  className="confirm-action-button"
+                  disabled={(selectedAction.color === 'black' || selectedAction.color === 'green') && !selectedCardFromHand}
+                >
+                  Confirmer l'action
+                </button>
+                <button
+                  onClick={handleCancelAction}
+                  className="cancel-action-button"
+                >
+                  Annuler
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -647,6 +734,15 @@ function HexGrid({ hexagons, garnisons, weapons, tokens, specialZones }) {
                 strokeWidth={1}
                 opacity={hex.constructible ? 0.8 : 0.5}
                 className="hex-cell"
+                onClick={() => {
+                  // Si on est en mode placement de tuile, définir la position de prévisualisation
+                  if (selectedAction?.color === 'orange' && selectedTile) {
+                    setPreviewPosition({ q: hex.q, r: hex.r })
+                  }
+                }}
+                style={{
+                  cursor: selectedAction?.color === 'orange' && selectedTile ? 'pointer' : 'default',
+                }}
               />
               {garnison && (
                 <circle
