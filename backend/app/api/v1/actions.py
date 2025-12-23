@@ -27,7 +27,7 @@ def get_game_state(game_id: int) -> Dict[str, Any]:
         game_id: ID de la partie
         
     Returns:
-        État du jeu
+        État du jeu (avec clés normalisées en int pour players)
     """
     from app.models.game_state import GameStateModel
     
@@ -98,8 +98,17 @@ def get_game_state(game_id: int) -> Dict[str, Any]:
     saved_state = GameStateModel.get_latest(game_id)
     
     if saved_state and saved_state.get("state_data"):
-        # Retourner l'état sauvegardé
-        return saved_state["state_data"]
+        # Normaliser les clés de players (convertir strings en int si nécessaire)
+        state = saved_state["state_data"]
+        if "players" in state and state["players"]:
+            # Vérifier si les clés sont des strings et les convertir en int
+            first_key = next(iter(state["players"].keys()))
+            if isinstance(first_key, str) and first_key.isdigit():
+                normalized_players = {}
+                for key, value in state["players"].items():
+                    normalized_players[int(key)] = value
+                state["players"] = normalized_players
+        return state
     
     # Si aucun état n'existe mais la partie est démarrée, initialiser
     # (peut arriver si l'état n'a pas été sauvegardé correctement)
@@ -144,7 +153,13 @@ async def play_color_action(
         )
     
     # Récupérer l'état du joueur
-    player_state = game_state["players"][player["player_number"]]
+    player_num = player["player_number"]
+    player_state = game_state["players"].get(player_num)
+    if not player_state:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"État du joueur {player_num} non trouvé"
+        )
     
     # Valider l'action
     is_valid, error_message = GameLogic.validate_color_action(
