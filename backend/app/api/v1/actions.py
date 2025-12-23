@@ -122,15 +122,22 @@ def get_game_state(game_id: int) -> Dict[str, Any]:
 
     # Si aucun état n'existe mais la partie est démarrée, initialiser
     # (peut arriver si l'état n'a pas été sauvegardé correctement)
+    print(f"[DEBUG] Aucun état sauvegardé trouvé, initialisation pour game_id {game_id}")
     state = GameLogic.initialize_game(game_id, players)
+    print(f"[DEBUG] État initialisé, status: {state.get('status')}, turn: {state.get('turn_number')}")
 
     # Sauvegarder l'état initial
-    GameStateModel.create(
-        game_id=game_id,
-        state_data=state,
-        turn_number=state.get("turn_number", 1),
-        current_player=state.get("current_player"),
-    )
+    try:
+        GameStateModel.create(
+            game_id=game_id,
+            state_data=state,
+            turn_number=state.get("turn_number", 1),
+            current_player=state.get("current_player"),
+        )
+        print(f"[DEBUG] État sauvegardé avec succès (fallback)")
+    except Exception as e:
+        print(f"[ERREUR] Impossible de sauvegarder l'état (fallback): {e}")
+        # Continuer quand même pour retourner l'état
 
     return state
 
