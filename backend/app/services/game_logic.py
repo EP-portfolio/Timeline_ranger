@@ -60,35 +60,55 @@ class GameLogic:
     def generate_initial_cards(count: int = 8) -> List[Dict[str, Any]]:
         """
         Génère des cartes initiales pour un joueur (POC avec cartes factices)
-        
+
         Args:
             count: Nombre de cartes à générer (par défaut 8)
-            
+
         Returns:
             Liste de cartes avec ID, nom, type, etc.
         """
         # Pour le POC, on génère des cartes factices
         # Plus tard, on récupérera les vraies cartes depuis la base de données
-        card_types = ["troupe", "technology"]
+        # Types de cartes selon le schéma SQL :
+        # - troupe : Cartes Troupes (ex-Animaux) → Ranger Noir
+        # - technology : Cartes Technologies (ex-Mécènes) → Ranger Bleu
+        # - quete : Cartes Quêtes (ex-Projets de Conservation) → Ranger Vert
+        card_types = ["troupe", "technology", "quete"]
         card_names = [
-            "Explosif - Lion", "Explosif - Tigre", "Explosif - Ours",
-            "Munition - Aigle", "Munition - Loup", "Munition - Renard",
-            "Technologie - Armure", "Technologie - Bouclier", "Technologie - Laser",
-            "Technologie - Radar", "Technologie - Propulseur", "Technologie - Réacteur"
+            # Troupes (Ranger Noir)
+            "Explosif - Lion",
+            "Explosif - Tigre",
+            "Explosif - Ours",
+            "Munition - Aigle",
+            "Munition - Loup",
+            "Munition - Renard",
+            # Technologies (Ranger Bleu)
+            "Technologie - Armure",
+            "Technologie - Bouclier",
+            "Technologie - Laser",
+            "Technologie - Radar",
+            "Technologie - Propulseur",
+            "Technologie - Réacteur",
+            # Quêtes (Ranger Vert)
+            "Quête - Diversité d'Armes",
+            "Quête - Maîtrise Tactique",
+            "Quête - Forteresse",
         ]
-        
+
         cards = []
         for i in range(count):
             card_type = random.choice(card_types)
             card_name = random.choice(card_names)
-            cards.append({
-                "id": f"card_{i}_{random.randint(1000, 9999)}",
-                "name": card_name,
-                "type": card_type,
-                "cost": random.randint(1, 5),
-                "size": random.randint(1, 3) if card_type == "troupe" else None,
-            })
-        
+            cards.append(
+                {
+                    "id": f"card_{i}_{random.randint(1000, 9999)}",
+                    "name": card_name,
+                    "type": card_type,
+                    "cost": random.randint(1, 5),
+                    "size": random.randint(1, 3) if card_type == "troupe" else None,
+                }
+            )
+
         return cards
 
     @staticmethod
@@ -115,7 +135,7 @@ class GameLogic:
         for player in players:
             # Générer 8 cartes initiales pour chaque joueur
             initial_cards = GameLogic.generate_initial_cards(8)
-            
+
             players_state[player["player_number"]] = {
                 "player_id": player["id"],
                 "user_id": player["user_id"],

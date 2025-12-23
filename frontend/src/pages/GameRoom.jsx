@@ -438,10 +438,10 @@ const GameRoom = () => {
               (Niveau {selectedAction.power})
             </h3>
             <p className="selection-instruction">
-              {selectedAction.color === 'blue' && 'Sélectionnez une carte Mécène ou gagnez des crédits'}
+              {selectedAction.color === 'blue' && 'Sélectionnez une carte Technologie (Mécène) ou gagnez des crédits'}
               {selectedAction.color === 'black' && 'Sélectionnez une carte Troupe à jouer'}
               {selectedAction.color === 'orange' && 'Action Construction (pas de carte nécessaire)'}
-              {selectedAction.color === 'green' && 'Action Association (pas de carte nécessaire)'}
+              {selectedAction.color === 'green' && 'Sélectionnez une carte Quête à réaliser'}
               {selectedAction.color === 'yellow' && 'Action Cartes (pas de carte nécessaire)'}
             </p>
 
@@ -501,8 +501,8 @@ const GameRoom = () => {
             <h3>Mes Cartes en Main ({myPlayerState.hand.length})</h3>
             <div className="cards-grid">
               {myPlayerState.hand.map((card) => (
-                <div 
-                  key={card.id} 
+                <div
+                  key={card.id}
                   className="card-item"
                   style={{ backgroundColor: getCardColorByType(card.type) }}
                 >
@@ -548,10 +548,12 @@ function getColorHex(color) {
 
 function getCardColorByType(cardType) {
   // Mapping des types de cartes aux couleurs des Rangers
+  // Basé sur le schéma SQL : troupes, technologies, quetes
   const cardTypeColors = {
-    troupe: '#1f2937',      // Noir - Ranger Animaux
-    technology: '#f97316',  // Orange - Ranger Construction
-    mecenes: '#3b82f6',     // Bleu - Ranger Mécène (si on a des cartes Mécène spécifiques)
+    troupe: '#1f2937',      // Noir - Ranger Animaux (Action Animaux)
+    technology: '#3b82f6',  // Bleu - Ranger Mécène (Action Mécène - pièces d'armure)
+    quete: '#10b981',       // Vert - Ranger Association (Action Association - quêtes)
+    mecenes: '#3b82f6',     // Bleu - Ranger Mécène (alias pour technologies)
   }
   return cardTypeColors[cardType] || '#2a2a2a' // Par défaut gris foncé
 }
