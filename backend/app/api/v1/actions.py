@@ -218,59 +218,58 @@ async def play_color_action(
             if not selected_card:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Carte non trouvée dans votre main"
+                    detail="Carte non trouvée dans votre main",
                 )
-            
+
             # Vérifier que c'est bien une carte Troupe
             if selected_card.get("type") != "troupe":
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Cette action nécessite une carte Troupe"
+                    detail="Cette action nécessite une carte Troupe",
                 )
-            
+
             # Vérifier les prérequis : construction de taille >= taille troupe et inoccupée
             troupe_size = selected_card.get("size", 0)
             if troupe_size == 0:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="La carte Troupe doit avoir une taille valide"
+                    detail="La carte Troupe doit avoir une taille valide",
                 )
-            
+
             # Chercher une construction (garnison) de taille suffisante et inoccupée
             board = player_state.get("board", {})
             garnisons = board.get("garnisons", [])
             weapons = board.get("weapons", [])
-            
+
             # Trouver une garnison disponible (taille >= taille troupe et non occupée)
             available_garnison = None
             for garnison in garnisons:
                 garnison_size = garnison.get("size", 0)
                 garnison_id = garnison.get("id")
-                
+
                 # Vérifier si la garnison est occupée
                 is_occupied = any(
-                    weapon.get("garnison_id") == garnison_id 
-                    for weapon in weapons
+                    weapon.get("garnison_id") == garnison_id for weapon in weapons
                 )
-                
+
                 # Vérifier que la taille est suffisante et qu'elle n'est pas occupée
                 if garnison_size >= troupe_size and not is_occupied:
                     available_garnison = garnison
                     break
-            
+
             if not available_garnison:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Vous devez avoir une construction (garnison) de taille {troupe_size} ou plus, inoccupée, pour poser cette troupe"
+                    detail=f"Vous devez avoir une construction (garnison) de taille {troupe_size} ou plus, inoccupée, pour poser cette troupe",
                 )
-            
+
             # Retirer la carte de la main
             player_state["hand"] = [
                 card
                 for card in player_state.get("hand", [])
                 if card["id"] != action.selected_card_id
             ]
-            
+
             # Ajouter la troupe au plateau dans la garnison
             new_weapon = {
                 "id": f"weapon_{selected_card['id']}",
@@ -281,6 +280,13 @@ async def play_color_action(
                 "weapon_type": selected_card.get("weapon_type"),
             }
             board["weapons"] = board.get("weapons", []) + [new_weapon]
+            
+            # Marquer la garnison comme occupée
+            for garnison in board["garnisons"]:
+                if garnison["id"] == available_garnison["id"]:
+                    garnison["occupied"] = True
+                    garnison["weapon_id"] = new_weapon["id"]
+                    break
 
     elif action.color == ColorAction.ORANGE:
         # Action Construction
@@ -295,15 +301,17 @@ async def play_color_action(
             player_state["scores"]["reputation"] += action.action_data[
                 "gain_reputation"
             ]
-        
+
         # Gestion des mines
         if action.action_data and "acquire_mine" in action.action_data:
-            mine_type = action.action_data.get("mine_type")  # Ex: "vibranium", "titanium", etc.
+            mine_type = action.action_data.get(
+                "mine_type"
+            )  # Ex: "vibranium", "titanium", etc.
             if mine_type:
                 # Compter les mines actuelles
                 mines = player_state.get("mines", [])
                 current_mine_count = len(mines)
-                
+
                 # Ajouter la nouvelle mine
                 new_mine = {
                     "id": f"mine_{len(mines) + 1}_{random.randint(1000, 9999)}",
@@ -311,7 +319,7 @@ async def play_color_action(
                 }
                 mines.append(new_mine)
                 player_state["mines"] = mines
-                
+
                 # Si c'est la 2ème mine, permettre l'amélioration d'un Ranger
                 if current_mine_count == 1:  # On avait 1 mine, maintenant on en a 2
                     # Le joueur peut améliorer un Ranger (sera géré par un endpoint séparé)

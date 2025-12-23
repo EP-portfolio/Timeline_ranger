@@ -136,8 +136,10 @@ class GameLogic:
             # Base commune pour toutes les cartes
             # Pour le POC, on utilise des coûts basés sur la taille/type
             # Les vraies valeurs viendront de la base de données
-            base_cost = 2 if card_type == "troupe" else 3 if card_type == "technology" else 1
-            
+            base_cost = (
+                2 if card_type == "troupe" else 3 if card_type == "technology" else 1
+            )
+
             card = {
                 "id": f"card_{i}_{random.randint(1000, 9999)}",
                 "name": card_name,
@@ -240,7 +242,7 @@ class GameLogic:
                 "hand": [],  # Cartes en main après sélection (4 cartes)
                 "hand_selected": False,  # Indique si le joueur a sélectionné ses 4 cartes
                 "resources": {
-                    "or": 0,  # Crédits
+                    "or": 25,  # Pièces d'or (PO) - Les joueurs commencent avec 25 PO
                     "titanium": 0,
                     "platine": 0,
                     "vibranium": 0,
