@@ -168,7 +168,15 @@ async def start_game(game_id: int, current_user: dict = Depends(get_current_user
                 detail="Aucun joueur trouvé dans la partie",
             )
 
+        # Debug: vérifier la structure des joueurs
+        print(f"[DEBUG] Nombre de joueurs: {len(players)}")
+        for p in players:
+            print(f"[DEBUG] Joueur: {p}")
+            if "player_number" not in p:
+                raise ValueError(f"Joueur sans player_number: {p}")
+
         game_state = GameLogic.initialize_game(game_id, players)
+        print(f"[DEBUG] État du jeu initialisé avec succès")
 
         # Sauvegarder l'état initial
         GameStateModel.create(
@@ -180,9 +188,14 @@ async def start_game(game_id: int, current_user: dict = Depends(get_current_user
 
         GameModel.update_status(game_id, "started")
 
-        return {"message": "Partie démarrée", "game_id": game_id, "game_state": game_state}
+        return {
+            "message": "Partie démarrée",
+            "game_id": game_id,
+            "game_state": game_state,
+        }
     except Exception as e:
         import traceback
+
         error_traceback = traceback.format_exc()
         print(f"[ERREUR] Erreur lors du démarrage de la partie {game_id}: {e}")
         print(f"[TRACEBACK] {error_traceback}")
