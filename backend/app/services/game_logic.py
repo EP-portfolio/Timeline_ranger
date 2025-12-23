@@ -132,55 +132,75 @@ class GameLogic:
             card_type = random.choice(card_types)
             # Choisir un nom qui correspond au type sélectionné
             card_name = random.choice(card_names_by_type[card_type])
-            
+
             # Base commune pour toutes les cartes
+            # Pour le POC, on utilise des coûts basés sur la taille/type
+            # Les vraies valeurs viendront de la base de données
+            base_cost = 2 if card_type == "troupe" else 3 if card_type == "technology" else 1
+            
             card = {
                 "id": f"card_{i}_{random.randint(1000, 9999)}",
                 "name": card_name,
                 "type": card_type,
-                "cost": random.randint(1, 5),
+                "cost": base_cost + random.randint(0, 2),  # Coût de base + variation
             }
-            
+
             # Attributs spécifiques selon le type (selon le schéma SQL)
             if card_type == "troupe":
                 # Extraire le type d'arme du nom (ex: "Explosifs - Canon Alpha" → "explosifs")
                 weapon_type_code = card_name.split(" - ")[0].lower().replace(" ", "_")
-                card.update({
-                    "size": random.randint(1, 3),
-                    "points_degats": random.randint(0, 3),
-                    "nombre_lasers": random.randint(0, 2),
-                    "points_developpement_technique": random.randint(0, 2),
-                    "paires_ailes": random.randint(0, 1),
-                    "raw_materials_required": [],  # Liste vide pour POC, sera remplie depuis la DB
-                    "bonus": None,  # Capacité → Bonus
-                    "effet_invocation": None,  # Effet unique immédiat
-                    "effet_quotidien": None,  # Effet permanent/récurrent
-                    "dernier_souffle": None,  # Effet de fin de partie
-                    "weapon_type": weapon_type_code,  # Type d'arme (ex: "explosifs", "munitions_standard")
-                })
+                card.update(
+                    {
+                        "size": random.randint(1, 3),
+                        "points_degats": random.randint(0, 3),
+                        "nombre_lasers": random.randint(0, 2),
+                        "points_developpement_technique": random.randint(0, 2),
+                        "paires_ailes": random.randint(0, 1),
+                        "raw_materials_required": [],  # Liste vide pour POC, sera remplie depuis la DB
+                        "bonus": None,  # Capacité → Bonus
+                        "effet_invocation": None,  # Effet unique immédiat
+                        "effet_quotidien": None,  # Effet permanent/récurrent
+                        "dernier_souffle": None,  # Effet de fin de partie
+                        "weapon_type": weapon_type_code,  # Type d'arme (ex: "explosifs", "munitions_standard")
+                    }
+                )
             elif card_type == "technology":
-                card.update({
-                    "level": random.randint(1, 3),
-                    "points_degats": random.randint(0, 2),
-                    "nombre_lasers": random.randint(0, 1),
-                    "points_developpement_technique": random.randint(0, 2),
-                    "paires_ailes": random.randint(0, 1),
-                    "or_par_jour": random.randint(0, 2),  # Revenus → Or par jour
-                    "is_armor_piece": random.choice([True, False]),  # Pièce d'armure ou action
-                    "armor_piece_type": random.choice(["Renfort", "Blindage", "Composant", "Dispositif"]) if random.choice([True, False]) else None,
-                    "bonus": None,
-                    "effet_invocation": None,
-                    "effet_quotidien": None,
-                    "dernier_souffle": None,
-                })
+                card.update(
+                    {
+                        "level": random.randint(1, 3),
+                        "points_degats": random.randint(0, 2),
+                        "nombre_lasers": random.randint(0, 1),
+                        "points_developpement_technique": random.randint(0, 2),
+                        "paires_ailes": random.randint(0, 1),
+                        "or_par_jour": random.randint(0, 2),  # Revenus → Or par jour
+                        "is_armor_piece": random.choice(
+                            [True, False]
+                        ),  # Pièce d'armure ou action
+                        "armor_piece_type": (
+                            random.choice(
+                                ["Renfort", "Blindage", "Composant", "Dispositif"]
+                            )
+                            if random.choice([True, False])
+                            else None
+                        ),
+                        "bonus": None,
+                        "effet_invocation": None,
+                        "effet_quotidien": None,
+                        "dernier_souffle": None,
+                    }
+                )
             elif card_type == "quete":
-                card.update({
-                    "quest_type": random.choice(["maitrise", "forteresse", "environnement", "programme"]),
-                    "condition_type": None,  # Type de condition
-                    "conditions": {},  # Conditions détaillées
-                    "rewards": {},  # Récompenses
-                })
-            
+                card.update(
+                    {
+                        "quest_type": random.choice(
+                            ["maitrise", "forteresse", "environnement", "programme"]
+                        ),
+                        "condition_type": None,  # Type de condition
+                        "conditions": {},  # Conditions détaillées
+                        "rewards": {},  # Récompenses
+                    }
+                )
+
             cards.append(card)
 
         return cards
@@ -234,7 +254,7 @@ class GameLogic:
                     "paires_ailes": 0,
                 },
                 "board": {
-                    "garnisons": [],  # Parties d'armure construites
+                    "garnisons": [],  # Parties d'armure construites (constructions)
                     "weapon_slots": [],  # Slots pour armes
                     "weapons": [],  # Armes installées (troupes)
                     "armor_pieces": [],  # Pièces d'armure (technologies)
@@ -243,6 +263,9 @@ class GameLogic:
                 "emissaires": 1,  # Émissaires disponibles
                 "x_tokens": 0,  # Jetons X (croix)
                 "last_breath_cards": [],  # Cartes Dernier Souffle (2 au début)
+                "mines": [],  # Mines acquises (vibranium, titanium, etc.)
+                "can_improve_ranger": False,  # Peut améliorer un Ranger (après 2ème mine)
+                "improve_ranger_pending": False,  # Amélioration de Ranger en attente
             }
 
         # Déterminer l'ordre de jeu initial (aléatoire)

@@ -51,6 +51,11 @@ class SelectInitialHandRequest(BaseModel):
     selected_card_ids: List[str] = Field(..., min_items=4, max_items=4, description="IDs des 4 cartes sélectionnées")
 
 
+class ExchangeCardForXTokenRequest(BaseModel):
+    """Requête pour échanger une carte contre un jeton X (croix)"""
+    card_id: str = Field(..., description="ID de la carte à échanger")
+
+
 class GameActionResponse(BaseModel):
     """Réponse après une action"""
     success: bool = Field(..., description="Action réussie")
