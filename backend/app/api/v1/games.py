@@ -188,10 +188,12 @@ async def start_game(game_id: int, current_user: dict = Depends(get_current_user
 
         GameModel.update_status(game_id, "started")
 
+        # Ne pas retourner game_state complet pour éviter les réponses trop volumineuses
+        # Le frontend récupérera l'état via /state
         return {
             "message": "Partie démarrée",
             "game_id": game_id,
-            "game_state": game_state,
+            "status": "started",
         }
     except Exception as e:
         import traceback
