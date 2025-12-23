@@ -178,15 +178,31 @@ async def start_game(game_id: int, current_user: dict = Depends(get_current_user
         game_state = GameLogic.initialize_game(game_id, players)
         print(f"[DEBUG] État du jeu initialisé avec succès")
 
-        # Sauvegarder l'état initial
-        GameStateModel.create(
+        # Sauvegarder l'état initial AVANT de mettre à jour le statut
+        # pour s'assurer que l'état est disponible quand le statut change
+        print(f"[DEBUG] Tentative de sauvegarde de l'état pour game_id {game_id}")
+        saved_state = GameStateModel.create(
             game_id=game_id,
             state_data=game_state,
             turn_number=game_state["turn_number"],
             current_player=game_state["current_player"],
         )
+        print(f"[DEBUG] État sauvegardé: {saved_state is not None}")
+        
+        if saved_state is None:
+            raise ValueError("Échec de la sauvegarde de l'état du jeu")
 
+        # Mettre à jour le statut APRÈS la sauvegarde de l'état
+        print(f"[DEBUG] Mise à jour du statut de la partie {game_id} à 'started'")
         GameModel.update_status(game_id, "started")
+        print(f"[DEBUG] Statut mis à jour avec succès")
+        
+        # Vérifier que l'état est bien récupérable
+        verification_state = GameStateModel.get_latest(game_id)
+        if verification_state:
+            print(f"[DEBUG] Vérification: État récupérable depuis DB, status: {verification_state.get('state_data', {}).get('status')}")
+        else:
+            print(f"[WARN] Vérification: Impossible de récupérer l'état juste après sauvegarde")
 
         # Ne pas retourner game_state complet pour éviter les réponses trop volumineuses
         # Le frontend récupérera l'état via /state
