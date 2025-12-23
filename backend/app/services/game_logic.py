@@ -208,6 +208,53 @@ class GameLogic:
         return cards
 
     @staticmethod
+    def initialize_board_grid(width: int = 10, height: int = 7) -> Dict[str, Any]:
+        """
+        Initialise la grille hexagonale de base de l'armure méca
+        
+        Args:
+            width: Largeur en hexagones (par défaut 10)
+            height: Hauteur en hexagones (par défaut 7)
+        
+        Returns:
+            Dictionnaire contenant la grille hexagonale avec terrains par défaut
+        """
+        hexagons = []
+        
+        # Générer tous les hexagones de la grille
+        # Système de coordonnées hexagonales (q, r)
+        for r in range(height):
+            offset = r // 2  # Décalage pour les lignes impaires
+            for q in range(width - offset):
+                hex_q = q + offset
+                hex_r = r
+                
+                # Déterminer le terrain par défaut selon la position
+                # Bordure = herbe, centre = terre craquelée
+                if q == 0 or q == width - 1 - offset or r == 0 or r == height - 1:
+                    terrain = "grass"  # Herbe sur les bords
+                else:
+                    terrain = "cracked_earth"  # Terre craquelée au centre
+                
+                hexagons.append({
+                    "q": hex_q,
+                    "r": hex_r,
+                    "x": 0,  # Sera calculé lors de l'affichage
+                    "y": 0,  # Sera calculé lors de l'affichage
+                    "terrain": terrain,
+                    "tokens": [],
+                    "special_zone": None,
+                    "garnison_id": None,
+                    "weapon_id": None,
+                })
+        
+        return {
+            "width": width,
+            "height": height,
+            "hexagons": hexagons,
+        }
+
+    @staticmethod
     def initialize_game(game_id: int, players: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
         Initialise une nouvelle partie
