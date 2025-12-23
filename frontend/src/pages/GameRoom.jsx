@@ -304,14 +304,61 @@ const GameRoom = () => {
           </div>
         </div>
 
+        {/* Sélection de cartes initiales */}
+        {gameState?.status === 'started' && myPlayerState && !myPlayerState.hand_selected && myPlayerState.initial_hand?.length > 0 && (
+          <div className="initial-hand-selection">
+            <h3>Sélectionnez 4 cartes parmi les 8 ({selectedCards.length}/4)</h3>
+            <div className="cards-grid">
+              {myPlayerState.initial_hand.map((card) => (
+                <div
+                  key={card.id}
+                  className={`card-item ${selectedCards.includes(card.id) ? 'selected' : ''}`}
+                  onClick={() => handleCardSelect(card.id)}
+                >
+                  <div className="card-name">{card.name}</div>
+                  <div className="card-type">{card.type}</div>
+                  <div className="card-cost">Coût: {card.cost}</div>
+                  {card.size && <div className="card-size">Taille: {card.size}</div>}
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={handleConfirmHandSelection}
+              className="confirm-hand-button"
+              disabled={selectedCards.length !== 4}
+            >
+              Confirmer la sélection (4 cartes)
+            </button>
+          </div>
+        )}
+
+        {/* Cartes en main (après sélection) */}
+        {myPlayerState?.hand_selected && myPlayerState.hand?.length > 0 && (
+          <div className="hand-section">
+            <h3>Mes Cartes en Main ({myPlayerState.hand.length})</h3>
+            <div className="cards-grid">
+              {myPlayerState.hand.map((card) => (
+                <div key={card.id} className="card-item">
+                  <div className="card-name">{card.name}</div>
+                  <div className="card-type">{card.type}</div>
+                  <div className="card-cost">Coût: {card.cost}</div>
+                  {card.size && <div className="card-size">Taille: {card.size}</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="actions-section">
           {gameState?.status === 'waiting' ? (
             <p className="waiting">La partie n'a pas encore démarré. {gameInfo?.host_id === user?.id ? 'Cliquez sur "Démarrer la Partie" pour commencer.' : 'En attente du démarrage...'}</p>
-          ) : isMyTurn ? (
+          ) : isMyTurn && myPlayerState?.hand_selected ? (
             <button onClick={handlePass} className="pass-button">
               Passer mon Tour
             </button>
+          ) : gameState?.status === 'started' && !myPlayerState?.hand_selected ? (
+            <p className="waiting">Veuillez d'abord sélectionner vos 4 cartes</p>
           ) : (
             <p className="waiting">En attente du joueur {gameState.current_player}...</p>
           )}
