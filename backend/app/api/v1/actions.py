@@ -38,12 +38,28 @@ def get_game_state(game_id: int) -> Dict[str, Any]:
             detail="Partie non trouvée"
         )
     
-    # Si la partie n'est pas démarrée, retourner une erreur
+    # Récupérer les joueurs
+    players = GamePlayerModel.list_by_game(game_id)
+    
+    # Si la partie n'est pas démarrée, retourner un état minimal pour la salle d'attente
     if game["status"] != "started":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="La partie n'a pas encore été démarrée"
-        )
+        # Retourner un état minimal pour la salle d'attente
+        return {
+            "game_id": game_id,
+            "status": "waiting",
+            "turn_number": 0,
+            "current_player": None,
+            "player_order": [p["player_number"] for p in players],
+            "players": {
+                p["player_number"]: {
+                    "player_id": p["id"],
+                    "user_id": p["user_id"],
+                    "player_number": p["player_number"],
+                    "armure_meca_id": p.get("armure_meca_id"),
+                }
+                for p in players
+            }
+        }
     
     # Essayer de récupérer l'état depuis la base de données
     saved_state = GameStateModel.get_latest(game_id)
@@ -52,9 +68,8 @@ def get_game_state(game_id: int) -> Dict[str, Any]:
         # Retourner l'état sauvegardé
         return saved_state["state_data"]
     
-    # Si aucun état n'existe, initialiser (ne devrait pas arriver si la partie est démarrée)
-    # Récupérer les joueurs
-    players = GamePlayerModel.list_by_game(game_id)
+    # Si aucun état n'existe mais la partie est démarrée, initialiser
+    # (peut arriver si l'état n'a pas été sauvegardé correctement)
     state = GameLogic.initialize_game(game_id, players)
     
     # Sauvegarder l'état initial

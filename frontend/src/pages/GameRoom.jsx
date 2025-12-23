@@ -109,7 +109,30 @@ const GameRoom = () => {
     return <div className="game-room-error">État du jeu non disponible</div>
   }
 
-  const currentPlayerState = gameState.players[gameState.current_player]
+  // Si la partie n'est pas démarrée, afficher la salle d'attente
+  if (gameState.status === 'waiting') {
+    return (
+      <div className="game-room">
+        <header className="game-room-header">
+          <h1>Partie {id}</h1>
+          <div className="connection-status">
+            <span className={wsConnected ? 'connected' : 'disconnected'}>
+              {wsConnected ? '🟢 Connecté' : '🔴 Déconnecté'}
+            </span>
+          </div>
+        </header>
+        <div className="game-room-content">
+          <div className="waiting-room">
+            <h2>Salle d'attente</h2>
+            <p>Joueurs: {Object.keys(gameState.players || {}).length}</p>
+            <p>En attente du démarrage de la partie...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const currentPlayerState = gameState.players?.[gameState.current_player]
   const isMyTurn = currentPlayerState?.user_id === user?.id
 
   return (
