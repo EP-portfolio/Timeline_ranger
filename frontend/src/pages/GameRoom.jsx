@@ -153,11 +153,15 @@ const GameRoom = () => {
   // Note: On affiche l'interface même si la partie est en "waiting"
   // pour permettre la visualisation des Rangers et de l'interface
 
-  const currentPlayerState = gameState.players?.[gameState.current_player]
+  const currentPlayerState = gameState.current_player 
+    ? gameState.players?.[gameState.current_player] 
+    : null
   const myPlayerState = Object.values(gameState.players || {}).find(
     (p) => p.user_id === user?.id
   )
-  const isMyTurn = currentPlayerState?.user_id === user?.id
+  const isMyTurn = gameState.current_player !== null && 
+                   gameState.current_player !== undefined &&
+                   currentPlayerState?.user_id === user?.id
 
   return (
     <div className="game-room">
