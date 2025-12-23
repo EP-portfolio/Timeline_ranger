@@ -16,6 +16,11 @@ const GameRoom = () => {
   const [selectedCards, setSelectedCards] = useState([])
   const [selectedAction, setSelectedAction] = useState(null) // { color, power } ou null
   const [selectedCardFromHand, setSelectedCardFromHand] = useState(null)
+  // États pour l'action Construction
+  const [availableTiles, setAvailableTiles] = useState([]) // Tuiles disponibles selon le niveau
+  const [selectedTile, setSelectedTile] = useState(null) // Tuile choisie
+  const [tileRotation, setTileRotation] = useState(0) // Rotation de la tuile (multiples de 60°)
+  const [previewPosition, setPreviewPosition] = useState(null) // { q, r } pour prévisualisation
 
   useEffect(() => {
     loadGameState()
@@ -299,7 +304,7 @@ const GameRoom = () => {
             <div className="map-armor-section">
               <div className="hex-grid-container">
                 {myPlayerState?.board?.grid?.hexagons ? (
-                  <HexGrid 
+                  <HexGrid
                     hexagons={myPlayerState.board.grid.hexagons}
                     garnisons={myPlayerState.board.garnisons || []}
                     weapons={myPlayerState.board.weapons || []}
@@ -451,7 +456,7 @@ const GameRoom = () => {
             <p className="selection-instruction">
               {selectedAction.color === 'blue' && 'Sélectionnez une carte Technologie (Mécène) ou gagnez des crédits'}
               {selectedAction.color === 'black' && 'Sélectionnez une carte Troupe à jouer'}
-              {selectedAction.color === 'orange' && 'Action Construction (pas de carte nécessaire)'}
+              {selectedAction.color === 'orange' && 'Sélectionnez une tuile de construction, puis son emplacement'}
               {selectedAction.color === 'green' && 'Sélectionnez une carte Quête à réaliser'}
               {selectedAction.color === 'yellow' && 'Action Cartes (pas de carte nécessaire)'}
             </p>
@@ -577,10 +582,13 @@ function HexGrid({ hexagons, garnisons, weapons, tokens, specialZones }) {
   const hexHeight = Math.sqrt(3) * hexSize
 
   // Fonction pour convertir coordonnées hexagonales (q, r) en coordonnées pixel
+  // Structure : 9 colonnes verticales (q = 0-8), chaque colonne a 6 ou 7 hexagones
   const hexToPixel = (q, r) => {
-    const x = hexSize * (Math.sqrt(3) * q + (Math.sqrt(3) / 2) * r)
-    const y = hexSize * ((3 / 2) * r)
-    return { x, y }
+    // Pour une grille hexagonale en colonnes verticales
+    // Les colonnes impaires sont décalées
+    const offsetX = hexSize * Math.sqrt(3) * q
+    const offsetY = hexSize * (1.5 * r + (q % 2) * 0.75) // Décalage pour colonnes paires/impaires
+    return { x: offsetX + 50, y: offsetY + 50 } // Offset pour centrer
   }
 
   // Obtenir le terrain d'un hexagone
@@ -594,7 +602,7 @@ function HexGrid({ hexagons, garnisons, weapons, tokens, specialZones }) {
 
   // Vérifier si un hexagone a une garnison
   const getGarnisonForHex = (q, r) => {
-    return garnisons.find(g => 
+    return garnisons.find(g =>
       g.hexagons?.some(h => h.q === q && h.r === r)
     )
   }
@@ -610,9 +618,9 @@ function HexGrid({ hexagons, garnisons, weapons, tokens, specialZones }) {
 
   return (
     <div className="hex-grid-wrapper">
-      <svg 
-        className="hex-grid-svg" 
-        viewBox="0 0 800 600" 
+      <svg
+        className="hex-grid-svg"
+        viewBox="0 0 800 600"
         preserveAspectRatio="xMidYMid meet"
       >
         {hexagons.map((hex, index) => {
@@ -620,7 +628,7 @@ function HexGrid({ hexagons, garnisons, weapons, tokens, specialZones }) {
           const terrainColor = getTerrainColor(hex.terrain, hex.constructible)
           const garnison = getGarnisonForHex(hex.q, hex.r)
           const weapon = getWeaponForHex(hex.q, hex.r)
-          
+
           // Points pour dessiner l'hexagone
           const points = []
           for (let i = 0; i < 6; i++) {
