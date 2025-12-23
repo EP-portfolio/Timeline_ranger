@@ -491,10 +491,11 @@
 }
 
 .card-item.selected {
-  border-color: #10b981;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
-  opacity: 0.9;
-  /* La couleur de fond reste celle du type de carte, mais avec une bordure verte */
+  border-color: #10b981 !important;
+  border-width: 3px;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+  transform: scale(1.05);
+  /* La couleur de fond reste celle du type de carte définie par style inline */
 }
 
 .card-name {
