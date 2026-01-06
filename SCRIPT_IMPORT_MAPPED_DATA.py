@@ -264,12 +264,43 @@ class TimelineRangerImporter:
         if not conditions_text or conditions_text.strip() == '':
             return None
         
-        # Pour l'instant, stocker le texte brut dans un JSONB
-        # On pourra parser plus tard selon les besoins
-        return {
+        # Parser les conditions structurées
+        import re
+        conditions = {
             'texte': conditions_text,
-            'raw': conditions_text
+            'raw': conditions_text,
+            'actions_requises': []  # Liste des actions requises avec niveau
         }
+        
+        # Mapping des noms d'actions vers les couleurs
+        action_patterns = {
+            r'Mécène\s+(I{1,3}|IV|V|VI{0,3}|IX|X)': 'blue',
+            r'Animal\s+(I{1,3}|IV|V|VI{0,3}|IX|X)': 'black',
+            r'Animaux\s+(I{1,3}|IV|V|VI{0,3}|IX|X)': 'black',
+            r'Construction\s+(I{1,3}|IV|V|VI{0,3}|IX|X)': 'orange',
+            r'Association\s+(I{1,3}|IV|V|VI{0,3}|IX|X)': 'green',
+            r'Cartes\s+(I{1,3}|IV|V|VI{0,3}|IX|X)': 'yellow'
+        }
+        
+        # Convertir chiffres romains en nombres
+        roman_to_int = {
+            'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5,
+            'VI': 6, 'VII': 7, 'VIII': 8, 'IX': 9, 'X': 10
+        }
+        
+        # Chercher toutes les actions requises
+        for pattern, color in action_patterns.items():
+            matches = re.finditer(pattern, conditions_text, re.IGNORECASE)
+            for match in matches:
+                roman_numeral = match.group(1).upper()
+                level = roman_to_int.get(roman_numeral, 1)
+                conditions['actions_requises'].append({
+                    'action': match.group(0),
+                    'color': color,
+                    'level_required': level
+                })
+        
+        return conditions
     
     def import_troupes(self, ods_file: str):
         """Importe les troupes (ex-Animaux) depuis l'ODS."""

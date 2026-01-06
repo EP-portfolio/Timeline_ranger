@@ -929,11 +929,31 @@ function CardDetail({ card }) {
         {card.raw_materials_required && Array.isArray(card.raw_materials_required) && card.raw_materials_required.length > 0 && (
           <div className="card-materials">
             <div className="card-section-title">Matériaux requis</div>
-            {card.raw_materials_required.map((material, idx) => (
-              <div key={idx} className="card-material-item">
-                • {material.material_name || material.material_id}: {material.quantity}
-              </div>
-            ))}
+            {card.raw_materials_required.map((material, idx) => {
+              // Mapping inverse : material_id → nom du continent/matériau
+              const materialNames = {
+                // IDs numériques depuis la DB (à adapter selon vos IDs réels)
+                1: 'Afrique (Titanium)',
+                2: 'Amériques (Platine)',
+                3: 'Asie (Vibranium)',
+                4: 'Australie (Carbone)',
+                5: 'Europe (Kevlar)',
+                // Noms de codes
+                'titanium': 'Afrique (Titanium)',
+                'platine': 'Amériques (Platine)',
+                'vibranium': 'Asie (Vibranium)',
+                'carbone': 'Australie (Carbone)',
+                'kevlar': 'Europe (Kevlar)'
+              }
+              const materialName = material.material_name || 
+                                  materialNames[material.material_id] || 
+                                  `Matériau ${material.material_id}`
+              return (
+                <div key={idx} className="card-material-item">
+                  • {materialName}: {material.quantity}
+                </div>
+              )
+            })}
           </div>
         )}
 
@@ -958,6 +978,55 @@ function CardDetail({ card }) {
           <div className="card-section">
             <div className="card-section-title">Type de quête</div>
             <div className="card-material-item">{card.quest_type}</div>
+          </div>
+        )}
+
+        {/* Conditions (pour troupes et technologies) */}
+        {(card.type === 'troupe' || card.type === 'technology') && card.conditions && (
+          <div className="card-conditions">
+            <div className="card-section-title">Conditions</div>
+            {(() => {
+              const conditions = card.conditions
+              
+              // Si conditions contient des actions requises structurées
+              if (conditions.actions_requises && Array.isArray(conditions.actions_requises)) {
+                return conditions.actions_requises.map((action, idx) => {
+                  const actionNames = {
+                    'blue': 'Mécène',
+                    'black': 'Animal',
+                    'orange': 'Construction',
+                    'green': 'Association',
+                    'yellow': 'Cartes'
+                  }
+                  const actionName = actionNames[action.color] || action.action
+                  return (
+                    <div key={idx} className="card-condition-item">
+                      <strong>{actionName} niveau {action.level_required}</strong> requis
+                    </div>
+                  )
+                })
+              }
+              
+              // Sinon, afficher le texte brut
+              if (conditions.texte) {
+                return (
+                  <div className="card-condition-item">
+                    {conditions.texte}
+                  </div>
+                )
+              }
+              
+              // Si conditions est une string directe
+              if (typeof conditions === 'string') {
+                return (
+                  <div className="card-condition-item">
+                    {conditions}
+                  </div>
+                )
+              }
+              
+              return <div className="card-condition-item">Aucune condition spécifiée</div>
+            })()}
           </div>
         )}
 

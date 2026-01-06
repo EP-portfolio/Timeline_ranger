@@ -999,22 +999,86 @@ class GameLogic:
                         if player_materials.get(str(material_id), 0) < quantity:
                             return False, f"Matériau insuffisant (ID: {material_id}, requis : {quantity})"
             
+            # Vérifier les actions requises (Mécène II, Animal II, etc.)
+            if "actions_requises" in conditions and isinstance(conditions["actions_requises"], list):
+                for action_req in conditions["actions_requises"]:
+                    ranger_color = action_req.get("color")
+                    required_level = action_req.get("level_required", 1)
+                    
+                    # Trouver le niveau du Ranger correspondant
+                    ranger_level = 0
+                    for ranger in player_state.get("rangers", []):
+                        if ranger.get("color") == ranger_color:
+                            ranger_level = ranger.get("power", 0)
+                            break
+                    
+                    if ranger_level < required_level:
+                        action_names = {
+                            "blue": "Mécène",
+                            "black": "Animal",
+                            "orange": "Construction",
+                            "green": "Association",
+                            "yellow": "Cartes"
+                        }
+                        action_name_display = action_names.get(ranger_color, action_req.get("action", "Action"))
+                        return False, f"Condition non remplie : Le Ranger {action_name_display} doit être au niveau {required_level} ou plus (votre niveau : {ranger_level})"
+            
             # Vérifier le texte de condition (pour conditions complexes non structurées)
             if "texte" in conditions:
                 condition_text = conditions["texte"]
-                # Pour l'instant, on accepte toutes les conditions textuelles
-                # TODO: Parser les conditions textuelles complexes
-                # Exemple : "Mécène II" → vérifier qu'on a déjà un Mécène de niveau 1
-                if "Mécène II" in condition_text:
-                    # Vérifier qu'on a déjà un Mécène de niveau 1 sur le plateau
-                    board_cards = player_state.get("board", [])
-                    has_level_1_mecene = False
-                    for board_card in board_cards:
-                        if board_card.get("type") == "technology" and board_card.get("level") == 1:
-                            has_level_1_mecene = True
+                # Parser les conditions textuelles avec regex si pas déjà parsées
+                import re
+                
+                # Mapping des noms d'actions vers les couleurs
+                action_color_mapping = {
+                    "Mécène": "blue",
+                    "Animal": "black",
+                    "Animaux": "black",
+                    "Construction": "orange",
+                    "Association": "green",
+                    "Cartes": "yellow"
+                }
+                
+                # Pattern pour détecter "Mécène II", "Animal II", etc.
+                pattern = r'(\w+)\s+(I{1,3}|IV|V|VI{0,3}|IX|X)'
+                matches = re.finditer(pattern, condition_text, re.IGNORECASE)
+                
+                for match in matches:
+                    action_name = match.group(1)
+                    roman_numeral = match.group(2).upper()
+                    
+                    # Convertir le chiffre romain en nombre
+                    roman_to_int = {
+                        'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5,
+                        'VI': 6, 'VII': 7, 'VIII': 8, 'IX': 9, 'X': 10
+                    }
+                    required_level = roman_to_int.get(roman_numeral, 1)
+                    
+                    # Trouver la couleur du Ranger correspondante
+                    ranger_color = None
+                    for key, color in action_color_mapping.items():
+                        if action_name.lower() in key.lower() or key.lower() in action_name.lower():
+                            ranger_color = color
                             break
-                    if not has_level_1_mecene:
-                        return False, "Condition non remplie : Vous devez avoir un Mécène de niveau 1 sur le plateau"
+                    
+                    if ranger_color:
+                        # Vérifier le niveau du Ranger correspondant
+                        ranger_level = 0
+                        for ranger in player_state.get("rangers", []):
+                            if ranger.get("color") == ranger_color:
+                                ranger_level = ranger.get("power", 0)
+                                break
+                        
+                        if ranger_level < required_level:
+                            action_names = {
+                                "blue": "Mécène",
+                                "black": "Animal",
+                                "orange": "Construction",
+                                "green": "Association",
+                                "yellow": "Cartes"
+                            }
+                            action_name_display = action_names.get(ranger_color, action_name)
+                            return False, f"Condition non remplie : Le Ranger {action_name_display} doit être au niveau {required_level} ou plus (votre niveau : {ranger_level})"
         
         return True, ""
     
