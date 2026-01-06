@@ -673,7 +673,8 @@ class TimelineRangerImporter:
         insert_query = """
         INSERT INTO quetes (
             card_number, original_name, mapped_name, quest_type,
-            condition_type, conditions, rewards, original_data
+            condition_type, conditions, rewards, bonus, original_data,
+            vague, jeu_base, jeu_mondes_marins, remplacee_par
         ) VALUES %s
         ON CONFLICT (card_number) DO UPDATE
         SET mapped_name = EXCLUDED.mapped_name,
@@ -681,14 +682,20 @@ class TimelineRangerImporter:
             condition_type = EXCLUDED.condition_type,
             conditions = EXCLUDED.conditions,
             rewards = EXCLUDED.rewards,
+            bonus = EXCLUDED.bonus,
             original_data = EXCLUDED.original_data,
+            vague = EXCLUDED.vague,
+            jeu_base = EXCLUDED.jeu_base,
+            jeu_mondes_marins = EXCLUDED.jeu_mondes_marins,
+            remplacee_par = EXCLUDED.remplacee_par,
             updated_at = NOW()
         """
         
         values = [(
             q['card_number'], q['original_name'], q['mapped_name'],
             q['quest_type'], q['condition_type'], q['conditions'],
-            q['rewards'], q['original_data']
+            q['rewards'], q['bonus'], q['original_data'],
+            q['vague'], q['jeu_base'], q['jeu_mondes_marins'], q['remplacee_par']
         ) for q in quetes_unique]
         
         execute_values(self.cur, insert_query, values)
