@@ -61,7 +61,7 @@ class GameLogic:
     def generate_initial_cards(count: int = 8) -> List[Dict[str, Any]]:
         """
         Génère des cartes initiales pour un joueur depuis la base de données
-        
+
         Récupère les vraies cartes avec toutes leurs propriétés d'Ark Nova :
         - Coûts réels
         - Conditions réelles
@@ -78,7 +78,7 @@ class GameLogic:
         # - troupe : Cartes Troupes (ex-Animaux) → Ranger Noir
         # - technology : Cartes Technologies (ex-Mécènes) → Ranger Bleu
         # - quete : Cartes Quêtes (ex-Projets de Conservation) → Ranger Vert
-        
+
         # Essayer de récupérer les vraies cartes depuis la DB
         try:
             return GameLogic._generate_cards_from_db(count)
@@ -86,105 +86,130 @@ class GameLogic:
             print(f"[ERREUR] Impossible de récupérer les cartes depuis la DB: {e}")
             print("[FALLBACK] Utilisation de cartes factices")
             return GameLogic._generate_fallback_cards(count)
-    
+
     @staticmethod
     def _generate_cards_from_db(count: int = 8) -> List[Dict[str, Any]]:
         """
         Récupère les vraies cartes depuis la base de données
-        
+
         Args:
             count: Nombre de cartes à générer
-            
+
         Returns:
             Liste de cartes avec toutes leurs propriétés réelles
         """
         cards = []
-        
+
         # Répartition approximative : 40% troupes, 40% technologies, 20% quêtes
         troupe_count = max(1, count * 4 // 10)
         tech_count = max(1, count * 4 // 10)
         quete_count = max(1, count - troupe_count - tech_count)
-        
+
         # Ajuster si le total dépasse count
         total = troupe_count + tech_count + quete_count
         if total > count:
             quete_count = count - troupe_count - tech_count
-        
+
         # Récupérer les cartes depuis la DB
         troupes = TroupeModel.get_random(troupe_count)
         technologies = TechnologyModel.get_random(tech_count)
         quetes = QueteModel.get_random(quete_count)
-        
+
         # Normaliser les cartes pour le format attendu
         for troupe in troupes:
             # Mapper toutes les propriétés réelles
             card = {
-                "id": troupe['id'],
-                "name": troupe['mapped_name'],
+                "id": troupe["id"],
+                "name": troupe["mapped_name"],
                 "type": "troupe",
-                "cost": troupe.get('cost', 0),  # Coût en Or (ex-Crédits)
-                "size": troupe.get('size'),
-                "points_degats": troupe.get('points_degats', 0),
-                "nombre_lasers": troupe.get('nombre_lasers', 0),
-                "points_developpement_technique": troupe.get('points_developpement_technique', 0),
-                "paires_ailes": troupe.get('paires_ailes', 0),
-                "raw_materials_required": troupe.get('raw_materials_required', []),
-                "bonus": troupe.get('bonus'),  # Capacité/Bonus
-                "effet_invocation": troupe.get('effet_invocation'),  # Effet unique immédiat (fond jaune)
-                "effet_quotidien": troupe.get('effet_quotidien'),  # Effet permanent/récurrent (fond bleu)
-                "dernier_souffle": troupe.get('dernier_souffle'),  # Effet de fin de partie (fond marron)
-                "weapon_type_id": troupe.get('weapon_type_id'),
-                "weapon_type": troupe.get('weapon_type_code'),  # Code du type d'arme (ex: "explosifs")
-                "weapon_type_name": troupe.get('weapon_type_name'),  # Nom du type d'arme
-                "type_garnison": troupe.get('type_garnison'),
-                "garnison_standard_minimum": troupe.get('garnison_standard_minimum', False),
-                "garnison_sans_adjacence": troupe.get('garnison_sans_adjacence', False),
-                "adjacent_lave": troupe.get('adjacent_lave', False),
-                "adjacent_vide": troupe.get('adjacent_vide', False),
-                "original_data": troupe.get('original_data', {}),  # Toutes les données originales
+                "is_factice": False,  # Carte réelle depuis la DB
+                "cost": troupe.get("cost", 0),  # Coût en Or (ex-Crédits)
+                "size": troupe.get("size"),
+                "points_degats": troupe.get("points_degats", 0),
+                "nombre_lasers": troupe.get("nombre_lasers", 0),
+                "points_developpement_technique": troupe.get(
+                    "points_developpement_technique", 0
+                ),
+                "paires_ailes": troupe.get("paires_ailes", 0),
+                "raw_materials_required": troupe.get("raw_materials_required", []),
+                "bonus": troupe.get("bonus"),  # Capacité/Bonus
+                "effet_invocation": troupe.get(
+                    "effet_invocation"
+                ),  # Effet unique immédiat (fond jaune)
+                "effet_quotidien": troupe.get(
+                    "effet_quotidien"
+                ),  # Effet permanent/récurrent (fond bleu)
+                "dernier_souffle": troupe.get(
+                    "dernier_souffle"
+                ),  # Effet de fin de partie (fond marron)
+                "weapon_type_id": troupe.get("weapon_type_id"),
+                "weapon_type": troupe.get(
+                    "weapon_type_code"
+                ),  # Code du type d'arme (ex: "explosifs")
+                "weapon_type_name": troupe.get(
+                    "weapon_type_name"
+                ),  # Nom du type d'arme
+                "type_garnison": troupe.get("type_garnison"),
+                "garnison_standard_minimum": troupe.get(
+                    "garnison_standard_minimum", False
+                ),
+                "garnison_sans_adjacence": troupe.get("garnison_sans_adjacence", False),
+                "adjacent_lave": troupe.get("adjacent_lave", False),
+                "adjacent_vide": troupe.get("adjacent_vide", False),
+                "original_data": troupe.get(
+                    "original_data", {}
+                ),  # Toutes les données originales
             }
             cards.append(card)
-        
+
         for tech in technologies:
             card = {
-                "id": tech['id'],
-                "name": tech['mapped_name'],
+                "id": tech["id"],
+                "name": tech["mapped_name"],
                 "type": "technology",
-                "cost": tech.get('level', 1),  # Pour technologies, cost = niveau requis (level)
-                "level": tech.get('level', 1),  # Niveau de la carte
-                "points_degats": tech.get('points_degats', 0),
-                "nombre_lasers": tech.get('nombre_lasers', 0),
-                "points_developpement_technique": tech.get('points_developpement_technique', 0),
-                "paires_ailes": tech.get('paires_ailes', 0),
-                "or_par_jour": tech.get('or_par_jour', 0),  # Revenus (fond violet)
-                "is_armor_piece": tech.get('is_armor_piece', False),
-                "armor_piece_type": tech.get('armor_piece_type'),
-                "bonus": tech.get('bonus'),
-                "effet_invocation": tech.get('effet_invocation'),
-                "effet_quotidien": tech.get('effet_quotidien'),
-                "dernier_souffle": tech.get('dernier_souffle'),
-                "original_data": tech.get('original_data', {}),
+                "is_factice": False,  # Carte réelle depuis la DB
+                "cost": tech.get(
+                    "level", 1
+                ),  # Pour technologies, cost = niveau requis (level)
+                "level": tech.get("level", 1),  # Niveau de la carte
+                "points_degats": tech.get("points_degats", 0),
+                "nombre_lasers": tech.get("nombre_lasers", 0),
+                "points_developpement_technique": tech.get(
+                    "points_developpement_technique", 0
+                ),
+                "paires_ailes": tech.get("paires_ailes", 0),
+                "or_par_jour": tech.get("or_par_jour", 0),  # Revenus (fond violet)
+                "is_armor_piece": tech.get("is_armor_piece", False),
+                "armor_piece_type": tech.get("armor_piece_type"),
+                "bonus": tech.get("bonus"),
+                "effet_invocation": tech.get("effet_invocation"),
+                "effet_quotidien": tech.get("effet_quotidien"),
+                "dernier_souffle": tech.get("dernier_souffle"),
+                "original_data": tech.get("original_data", {}),
             }
             cards.append(card)
-        
+
         for quete in quetes:
             card = {
-                "id": quete['id'],
-                "name": quete['mapped_name'],
+                "id": quete["id"],
+                "name": quete["mapped_name"],
                 "type": "quete",
-                "quest_type": quete.get('quest_type'),
-                "condition_type": quete.get('condition_type'),
-                "conditions": quete.get('conditions', {}),  # Conditions détaillées (JSONB)
-                "rewards": quete.get('rewards', {}),  # Récompenses (JSONB)
-                "original_data": quete.get('original_data', {}),
+                "is_factice": False,  # Carte réelle depuis la DB
+                "quest_type": quete.get("quest_type"),
+                "condition_type": quete.get("condition_type"),
+                "conditions": quete.get(
+                    "conditions", {}
+                ),  # Conditions détaillées (JSONB)
+                "rewards": quete.get("rewards", {}),  # Récompenses (JSONB)
+                "original_data": quete.get("original_data", {}),
             }
             cards.append(card)
-        
+
         # Mélanger les cartes
         random.shuffle(cards)
-        
+
         return cards[:count]  # Retourner exactement le nombre demandé
-    
+
     @staticmethod
     def _generate_fallback_cards(count: int = 8) -> List[Dict[str, Any]]:
         """

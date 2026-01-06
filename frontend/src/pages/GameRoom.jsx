@@ -781,6 +781,9 @@ function CardDetail({ card }) {
       <div className="card-header">
         <div className="card-name">{card.name}</div>
         <div className="card-type">{card.type}</div>
+        {card.is_factice && (
+          <div className="card-factice-badge">⚠️ CARTE FACTICE</div>
+        )}
       </div>
       
       <div className="card-body">

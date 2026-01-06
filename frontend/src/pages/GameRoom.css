@@ -527,7 +527,7 @@
 }
 
 .card-item {
-  background: #1a1a1a;
+  background: #0a0a0a;
   padding: 1rem;
   border-radius: 12px;
   border: 2px solid #444;
@@ -539,7 +539,9 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+  /* Overlay sombre pour meilleur contraste */
+  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9));
 }
 
 .card-item:hover {
@@ -562,19 +564,37 @@
 }
 
 .card-name {
-  color: #fff;
+  color: #ffffff;
   font-weight: 700;
   font-size: 1.1rem;
   margin-bottom: 0.25rem;
   line-height: 1.2;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .card-type {
-  color: #aaa;
+  color: #e0e0e0;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  font-weight: 500;
+  font-weight: 600;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.card-factice-badge {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background: rgba(239, 68, 68, 0.9);
+  color: #ffffff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  z-index: 10;
 }
 
 .card-body {
@@ -590,21 +610,23 @@
 }
 
 .card-section-title {
-  color: #888;
+  color: #c0c0c0;
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 0.25rem;
-  font-weight: 600;
+  font-weight: 700;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .card-cost {
-  color: #eab308;
+  color: #ffd700;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .card-cost::before {
@@ -613,9 +635,10 @@
 }
 
 .card-size {
-  color: #3b82f6;
+  color: #60a5fa;
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .card-stats {
@@ -633,13 +656,16 @@
 }
 
 .card-stat-label {
-  color: #aaa;
+  color: #d0d0d0;
   min-width: 80px;
+  font-weight: 500;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .card-stat-value {
-  color: #fff;
-  font-weight: 600;
+  color: #ffffff;
+  font-weight: 700;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .stat-damage { color: #ef4444; }
@@ -656,8 +682,9 @@
 
 .card-material-item {
   font-size: 0.75rem;
-  color: #aaa;
+  color: #d0d0d0;
   margin-bottom: 0.25rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .card-effects {
@@ -668,24 +695,27 @@
 
 .card-effect {
   font-size: 0.75rem;
-  color: #ccc;
+  color: #e0e0e0;
   margin-bottom: 0.5rem;
   padding: 0.25rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
+  border-left: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .card-effect-title {
-  font-weight: 600;
-  color: #fff;
+  font-weight: 700;
+  color: #ffffff;
   margin-bottom: 0.15rem;
   font-size: 0.7rem;
   text-transform: uppercase;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .card-effect-text {
-  color: #aaa;
+  color: #d0d0d0;
   line-height: 1.3;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .card-conditions {
@@ -696,8 +726,10 @@
 
 .card-condition-item {
   font-size: 0.75rem;
-  color: #fbbf24;
+  color: #ffd700;
   margin-bottom: 0.25rem;
+  font-weight: 600;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .card-level {
@@ -735,17 +767,18 @@
 }
 
 .card-level-required {
-  color: #3b82f6;
+  color: #93c5fd;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 700;
   display: flex;
   align-items: center;
   gap: 0.25rem;
   margin-bottom: 0.5rem;
   padding: 0.5rem;
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(59, 130, 246, 0.2);
   border-radius: 6px;
-  border-left: 3px solid #3b82f6;
+  border-left: 3px solid #60a5fa;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .confirm-hand-button {
