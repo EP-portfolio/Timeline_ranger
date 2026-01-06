@@ -83,15 +83,15 @@ class TechnologyModel:
                     if card.get('original_data'):
                         if isinstance(card['original_data'], str):
                             card['original_data'] = json.loads(card['original_data'])
-                    # Pour les technologies, cost = niveau requis du Ranger Bleu (level)
-                    # Le level est le niveau de la carte elle-même
+                    # Pour les technologies :
+                    # - level = niveau de la carte (depuis "Niveau" dans Ark Nova)
+                    # - cost = niveau requis du Ranger Bleu (depuis "Crédits" dans Ark Nova)
                     card['type'] = 'technology'
                     card['id'] = f"technology_{card['id']}"
                     # Le nom doit être unique, utiliser mapped_name
                     card['name'] = card['mapped_name']
-                    # Pour les technologies, le cost représente le niveau requis (level)
-                    if card.get('level'):
-                        card['cost'] = card['level']  # Niveau requis = level de la carte
+                    # Le cost est déjà correct depuis la DB (depuis Crédits)
+                    # Ne pas écraser avec level
                     cards.append(card)
                 
                 return cards

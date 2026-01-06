@@ -790,7 +790,7 @@ function CardDetail({ card }) {
         {/* Coût ou Niveau requis selon le type de carte */}
         {card.type === 'technology' && card.cost !== undefined && card.cost !== null && (
           <div className="card-section">
-            <div className="card-level-required">🔵 Niveau requis: {card.cost}</div>
+            <div className="card-level-required">🔵 Niveau requis Ranger Bleu: {card.cost}</div>
           </div>
         )}
         
@@ -800,9 +800,9 @@ function CardDetail({ card }) {
           </div>
         )}
 
-        {/* Niveau (pour technologies - affiché en badge) */}
-        {card.level && (
-          <div className="card-level">Niveau {card.level}</div>
+        {/* Niveau de la carte (pour technologies - affiché en badge) */}
+        {card.type === 'technology' && card.level && (
+          <div className="card-level">Niveau carte: {card.level}</div>
         )}
 
         {/* Taille (pour troupes) */}
@@ -887,26 +887,90 @@ function CardDetail({ card }) {
         )}
 
         {/* Conditions (pour quêtes) */}
-        {card.conditions && typeof card.conditions === 'object' && Object.keys(card.conditions).length > 0 && (
+        {card.type === 'quete' && (
           <div className="card-conditions">
             <div className="card-section-title">Conditions</div>
-            {Object.entries(card.conditions).map(([key, value], idx) => (
-              <div key={idx} className="card-condition-item">
-                {key}: {typeof value === 'object' ? JSON.stringify(value) : value}
-              </div>
-            ))}
+            {card.original_data && (
+              <>
+                {/* Condition 1 */}
+                {card.original_data['Condition 1'] && (
+                  <div className="card-condition-item">
+                    <strong>Condition 1:</strong> {card.original_data['Condition 1']}
+                  </div>
+                )}
+                {/* Condition 2 */}
+                {card.original_data['Condition 2'] && (
+                  <div className="card-condition-item">
+                    <strong>Condition 2:</strong> {card.original_data['Condition 2']}
+                  </div>
+                )}
+                {/* Condition 3 */}
+                {card.original_data['Condition 3'] && (
+                  <div className="card-condition-item">
+                    <strong>Condition 3:</strong> {card.original_data['Condition 3']}
+                  </div>
+                )}
+                {/* Fallback si conditions dans l'objet conditions */}
+                {!card.original_data['Condition 1'] && card.conditions && typeof card.conditions === 'object' && Object.keys(card.conditions).length > 0 && (
+                  Object.entries(card.conditions).map(([key, value], idx) => (
+                    <div key={idx} className="card-condition-item">
+                      <strong>{key}:</strong> {typeof value === 'object' ? JSON.stringify(value) : value}
+                    </div>
+                  ))
+                )}
+              </>
+            )}
+            {!card.original_data && card.conditions && typeof card.conditions === 'object' && Object.keys(card.conditions).length > 0 && (
+              Object.entries(card.conditions).map(([key, value], idx) => (
+                <div key={idx} className="card-condition-item">
+                  <strong>{key}:</strong> {typeof value === 'object' ? JSON.stringify(value) : value}
+                </div>
+              ))
+            )}
           </div>
         )}
 
         {/* Récompenses (pour quêtes) */}
-        {card.rewards && typeof card.rewards === 'object' && Object.keys(card.rewards).length > 0 && (
+        {card.type === 'quete' && (
           <div className="card-section">
             <div className="card-section-title">Récompenses</div>
-            {Object.entries(card.rewards).map(([key, value], idx) => (
-              <div key={idx} className="card-material-item">
-                {key}: {typeof value === 'object' ? JSON.stringify(value) : value}
-              </div>
-            ))}
+            {card.original_data && (
+              <>
+                {/* Récompense 1 */}
+                {card.original_data['Récompense 1'] && (
+                  <div className="card-material-item">
+                    <strong>Récompense 1:</strong> {card.original_data['Récompense 1']}
+                  </div>
+                )}
+                {/* Récompense 2 */}
+                {card.original_data['Récompense 2'] && (
+                  <div className="card-material-item">
+                    <strong>Récompense 2:</strong> {card.original_data['Récompense 2']}
+                  </div>
+                )}
+                {/* Récompense 3 */}
+                {card.original_data['Récompense 3'] && (
+                  <div className="card-material-item">
+                    <strong>Récompense 3:</strong> {card.original_data['Récompense 3']}
+                  </div>
+                )}
+                {/* Fallback si récompenses dans l'objet rewards */}
+                {!card.original_data['Récompense 1'] && card.rewards && typeof card.rewards === 'object' && Object.keys(card.rewards).length > 0 && (
+                  Object.entries(card.rewards).map(([key, value], idx) => (
+                    <div key={idx} className="card-material-item">
+                      <strong>{key}:</strong> {typeof value === 'object' ? JSON.stringify(value) : value}
+                    </div>
+                  ))
+                )}
+              </>
+            )}
+            {!card.original_data && card.rewards && typeof card.rewards === 'object' && Object.keys(card.rewards).length > 0 && (
+              Object.entries(card.rewards).map(([key, value], idx) => (
+                <div key={idx} className="card-material-item">
+                  <strong>{key}:</strong> {typeof value === 'object' ? JSON.stringify(value) : value}
+                </div>
+              ))
+            )}
           </div>
         )}
 

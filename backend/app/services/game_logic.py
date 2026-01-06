@@ -168,10 +168,8 @@ class GameLogic:
                 "name": tech["mapped_name"],
                 "type": "technology",
                 "is_factice": False,  # Carte réelle depuis la DB
-                "cost": tech.get(
-                    "level", 1
-                ),  # Pour technologies, cost = niveau requis (level)
-                "level": tech.get("level", 1),  # Niveau de la carte
+                "cost": tech.get("cost", 1),  # Pour technologies, cost = niveau requis du Ranger Bleu (depuis Crédits)
+                "level": tech.get("level", 1),  # Niveau de la carte (depuis Niveau dans Ark Nova)
                 "points_degats": tech.get("points_degats", 0),
                 "nombre_lasers": tech.get("nombre_lasers", 0),
                 "points_developpement_technique": tech.get(
