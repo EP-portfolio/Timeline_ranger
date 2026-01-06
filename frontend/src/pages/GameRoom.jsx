@@ -489,22 +489,36 @@ const GameRoom = () => {
           </div>
         </div>
 
-        {/* Jauge de dégâts */}
+        {/* Jauge de dégâts améliorée */}
         {myPlayerState && (
           <div className="damage-gauge-section">
-            <h3>JAUGE DÉGÂTS</h3>
+            <h3>PUISSANCE ARMURE MÉCA</h3>
             <div className="damage-gauge">
               <div className="gauge-bar">
                 <div
                   className="gauge-fill"
                   style={{
                     width: `${Math.min((myPlayerState.scores?.points_degats || 0) / 100, 1) * 100}%`,
+                    background: `linear-gradient(90deg, 
+                      #10b981 0%, 
+                      #f59e0b ${Math.min((myPlayerState.scores?.points_degats || 0) / 2, 50)}%, 
+                      #ef4444 ${Math.min((myPlayerState.scores?.points_degats || 0) / 1.5, 70)}%, 
+                      #dc2626 100%)`,
+                    boxShadow: `0 0 ${Math.min((myPlayerState.scores?.points_degats || 0) / 5, 20)}px rgba(239, 68, 68, 0.6)`,
+                    transition: 'all 0.5s ease-out'
                   }}
                 />
               </div>
-              <span className="gauge-value">
-                {myPlayerState.scores?.points_degats || 0} / 100
-              </span>
+              <div className="gauge-info">
+                <span className="gauge-value">
+                  {myPlayerState.scores?.points_degats || 0} / 100
+                </span>
+                {myPlayerState.board?.weapons && myPlayerState.board.weapons.length > 0 && (
+                  <span className="gauge-weapons-count">
+                    {myPlayerState.board.weapons.length} arme{myPlayerState.board.weapons.length > 1 ? 's' : ''} installée{myPlayerState.board.weapons.length > 1 ? 's' : ''}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         )}

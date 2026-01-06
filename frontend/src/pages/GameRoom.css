@@ -313,6 +313,71 @@
 
 .weapon-marker {
   pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.garnison-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.weapon-damage-badge {
+  pointer-events: none;
+  user-select: none;
+}
+
+.garnison-power-badge {
+  animation: pulse-badge 2s ease-in-out infinite;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.garnison-power-text {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Animations pour les effets visuels */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes pulse-badge {
+  0%, 100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* Animation de flash lors du placement d'une arme */
+@keyframes weapon-flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+}
+
+.weapon-marker.just-placed {
+  animation: weapon-flash 0.6s ease-out;
 }
 
 .hex-coords {
