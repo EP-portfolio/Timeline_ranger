@@ -890,43 +890,42 @@ function CardDetail({ card }) {
         {card.type === 'quete' && (
           <div className="card-conditions">
             <div className="card-section-title">Conditions</div>
-            {card.original_data && (
-              <>
-                {/* Condition 1 */}
-                {card.original_data['Condition 1'] && (
-                  <div className="card-condition-item">
-                    <strong>Condition 1:</strong> {card.original_data['Condition 1']}
+            {(() => {
+              // Essayer d'extraire depuis original_data d'abord
+              const originalData = card.original_data || {}
+              const conditions = []
+              
+              // Chercher les colonnes Condition 1, Condition 2, Condition 3 (avec différentes variantes)
+              for (let i = 1; i <= 3; i++) {
+                const conditionKey = `Condition ${i}`
+                const conditionValue = originalData[conditionKey] || 
+                                      originalData[`Condition${i}`] || 
+                                      originalData[`condition_${i}`] ||
+                                      originalData[`condition${i}`]
+                if (conditionValue && String(conditionValue).trim() !== '' && conditionValue !== 'nan') {
+                  conditions.push({ num: i, text: conditionValue })
+                }
+              }
+              
+              // Si pas trouvé dans original_data, chercher dans conditions
+              if (conditions.length === 0 && card.conditions && typeof card.conditions === 'object') {
+                Object.entries(card.conditions).forEach(([key, value]) => {
+                  if (value && String(value).trim() !== '' && value !== 'nan') {
+                    conditions.push({ num: key, text: value })
+                  }
+                })
+              }
+              
+              if (conditions.length > 0) {
+                return conditions.map((cond, idx) => (
+                  <div key={idx} className="card-condition-item">
+                    <strong>Condition {cond.num}:</strong> {String(cond.text)}
                   </div>
-                )}
-                {/* Condition 2 */}
-                {card.original_data['Condition 2'] && (
-                  <div className="card-condition-item">
-                    <strong>Condition 2:</strong> {card.original_data['Condition 2']}
-                  </div>
-                )}
-                {/* Condition 3 */}
-                {card.original_data['Condition 3'] && (
-                  <div className="card-condition-item">
-                    <strong>Condition 3:</strong> {card.original_data['Condition 3']}
-                  </div>
-                )}
-                {/* Fallback si conditions dans l'objet conditions */}
-                {!card.original_data['Condition 1'] && card.conditions && typeof card.conditions === 'object' && Object.keys(card.conditions).length > 0 && (
-                  Object.entries(card.conditions).map(([key, value], idx) => (
-                    <div key={idx} className="card-condition-item">
-                      <strong>{key}:</strong> {typeof value === 'object' ? JSON.stringify(value) : value}
-                    </div>
-                  ))
-                )}
-              </>
-            )}
-            {!card.original_data && card.conditions && typeof card.conditions === 'object' && Object.keys(card.conditions).length > 0 && (
-              Object.entries(card.conditions).map(([key, value], idx) => (
-                <div key={idx} className="card-condition-item">
-                  <strong>{key}:</strong> {typeof value === 'object' ? JSON.stringify(value) : value}
-                </div>
-              ))
-            )}
+                ))
+              } else {
+                return <div className="card-condition-item">Aucune condition spécifiée</div>
+              }
+            })()}
           </div>
         )}
 
@@ -934,43 +933,46 @@ function CardDetail({ card }) {
         {card.type === 'quete' && (
           <div className="card-section">
             <div className="card-section-title">Récompenses</div>
-            {card.original_data && (
-              <>
-                {/* Récompense 1 */}
-                {card.original_data['Récompense 1'] && (
-                  <div className="card-material-item">
-                    <strong>Récompense 1:</strong> {card.original_data['Récompense 1']}
+            {(() => {
+              // Essayer d'extraire depuis original_data d'abord
+              const originalData = card.original_data || {}
+              const rewards = []
+              
+              // Chercher les colonnes Récompense 1, Récompense 2, Récompense 3 (avec différentes variantes)
+              for (let i = 1; i <= 3; i++) {
+                const rewardKey = `Récompense ${i}`
+                const rewardValue = originalData[rewardKey] || 
+                                  originalData[`Récompense${i}`] || 
+                                  originalData[`recompense_${i}`] || 
+                                  originalData[`recompense${i}`] ||
+                                  originalData[`Reward ${i}`] || 
+                                  originalData[`Reward${i}`] ||
+                                  originalData[`reward_${i}`] ||
+                                  originalData[`reward${i}`]
+                if (rewardValue && String(rewardValue).trim() !== '' && rewardValue !== 'nan') {
+                  rewards.push({ num: i, text: rewardValue })
+                }
+              }
+              
+              // Si pas trouvé dans original_data, chercher dans rewards
+              if (rewards.length === 0 && card.rewards && typeof card.rewards === 'object') {
+                Object.entries(card.rewards).forEach(([key, value]) => {
+                  if (value && String(value).trim() !== '' && value !== 'nan') {
+                    rewards.push({ num: key, text: value })
+                  }
+                })
+              }
+              
+              if (rewards.length > 0) {
+                return rewards.map((reward, idx) => (
+                  <div key={idx} className="card-material-item">
+                    <strong>Récompense {reward.num}:</strong> {String(reward.text)}
                   </div>
-                )}
-                {/* Récompense 2 */}
-                {card.original_data['Récompense 2'] && (
-                  <div className="card-material-item">
-                    <strong>Récompense 2:</strong> {card.original_data['Récompense 2']}
-                  </div>
-                )}
-                {/* Récompense 3 */}
-                {card.original_data['Récompense 3'] && (
-                  <div className="card-material-item">
-                    <strong>Récompense 3:</strong> {card.original_data['Récompense 3']}
-                  </div>
-                )}
-                {/* Fallback si récompenses dans l'objet rewards */}
-                {!card.original_data['Récompense 1'] && card.rewards && typeof card.rewards === 'object' && Object.keys(card.rewards).length > 0 && (
-                  Object.entries(card.rewards).map(([key, value], idx) => (
-                    <div key={idx} className="card-material-item">
-                      <strong>{key}:</strong> {typeof value === 'object' ? JSON.stringify(value) : value}
-                    </div>
-                  ))
-                )}
-              </>
-            )}
-            {!card.original_data && card.rewards && typeof card.rewards === 'object' && Object.keys(card.rewards).length > 0 && (
-              Object.entries(card.rewards).map(([key, value], idx) => (
-                <div key={idx} className="card-material-item">
-                  <strong>{key}:</strong> {typeof value === 'object' ? JSON.stringify(value) : value}
-                </div>
-              ))
-            )}
+                ))
+              } else {
+                return <div className="card-material-item">Aucune récompense spécifiée</div>
+              }
+            })()}
           </div>
         )}
 
