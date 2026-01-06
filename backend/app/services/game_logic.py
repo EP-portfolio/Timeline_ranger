@@ -156,6 +156,12 @@ class GameLogic:
                 "garnison_sans_adjacence": troupe.get("garnison_sans_adjacence", False),
                 "adjacent_lave": troupe.get("adjacent_lave", False),
                 "adjacent_vide": troupe.get("adjacent_vide", False),
+                "effet_du_vide": troupe.get("effet_du_vide"),  # Effet Corallien
+                "conditions": troupe.get("conditions", {}),  # Conditions pour jouer
+                "vague": troupe.get("vague"),  # Numéro de vague
+                "jeu_base": troupe.get("jeu_base", True),  # Jeu de base
+                "jeu_mondes_marins": troupe.get("jeu_mondes_marins", False),  # Extension
+                "promo": troupe.get("promo", False),  # Carte promo
                 "original_data": troupe.get(
                     "original_data", {}
                 ),  # Toutes les données originales
@@ -183,6 +189,12 @@ class GameLogic:
                 "effet_invocation": tech.get("effet_invocation"),
                 "effet_quotidien": tech.get("effet_quotidien"),
                 "dernier_souffle": tech.get("dernier_souffle"),
+                "conditions": tech.get("conditions", {}),  # Conditions pour jouer
+                "vague": tech.get("vague"),  # Numéro de vague
+                "jeu_base": tech.get("jeu_base", True),  # Jeu de base
+                "jeu_mondes_marins": tech.get("jeu_mondes_marins", False),  # Extension
+                "promo": tech.get("promo", False),  # Carte promo
+                "remplacee_par": tech.get("remplacee_par"),  # Carte remplaçante
                 "original_data": tech.get("original_data", {}),
             }
             cards.append(card)
@@ -199,6 +211,11 @@ class GameLogic:
                     "conditions", {}
                 ),  # Conditions détaillées (JSONB)
                 "rewards": quete.get("rewards", {}),  # Récompenses (JSONB)
+                "bonus": quete.get("bonus"),  # Bonus du joueur posant la carte
+                "vague": quete.get("vague"),  # Numéro de vague
+                "jeu_base": quete.get("jeu_base", True),  # Jeu de base
+                "jeu_mondes_marins": quete.get("jeu_mondes_marins", False),  # Extension
+                "remplacee_par": quete.get("remplacee_par"),  # Carte remplaçante
                 "original_data": quete.get("original_data", {}),
             }
             cards.append(card)

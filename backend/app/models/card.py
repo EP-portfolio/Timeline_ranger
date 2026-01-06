@@ -24,6 +24,8 @@ class TroupeModel:
                         t.effet_quotidien, t.dernier_souffle,
                         t.type_garnison, t.garnison_standard_minimum,
                         t.garnison_sans_adjacence, t.adjacent_lave, t.adjacent_vide,
+                        t.effet_du_vide, t.conditions, t.vague, t.jeu_base,
+                        t.jeu_mondes_marins, t.promo,
                         t.original_data,
                         wt.code as weapon_type_code, wt.name as weapon_type_name
                     FROM troupes t
@@ -40,6 +42,9 @@ class TroupeModel:
                     if card.get('raw_materials_required'):
                         if isinstance(card['raw_materials_required'], str):
                             card['raw_materials_required'] = json.loads(card['raw_materials_required'])
+                    if card.get('conditions'):
+                        if isinstance(card['conditions'], str):
+                            card['conditions'] = json.loads(card['conditions'])
                     if card.get('original_data'):
                         if isinstance(card['original_data'], str):
                             card['original_data'] = json.loads(card['original_data'])
@@ -69,7 +74,10 @@ class TechnologyModel:
                         points_degats, nombre_lasers,
                         points_developpement_technique, paires_ailes,
                         cost, or_par_jour, bonus, effet_invocation,
-                        effet_quotidien, dernier_souffle, original_data
+                        effet_quotidien, dernier_souffle,
+                        conditions, vague, jeu_base, jeu_mondes_marins,
+                        promo, remplacee_par,
+                        original_data
                     FROM technologies
                     ORDER BY RANDOM()
                     LIMIT %s
@@ -80,6 +88,9 @@ class TechnologyModel:
                 for row in results:
                     card = dict(row)
                     # Convertir JSONB en dict Python
+                    if card.get('conditions'):
+                        if isinstance(card['conditions'], str):
+                            card['conditions'] = json.loads(card['conditions'])
                     if card.get('original_data'):
                         if isinstance(card['original_data'], str):
                             card['original_data'] = json.loads(card['original_data'])
@@ -112,6 +123,7 @@ class QueteModel:
                     SELECT 
                         id, card_number, original_name, mapped_name,
                         quest_type, condition_type, conditions, rewards,
+                        bonus, vague, jeu_base, jeu_mondes_marins, remplacee_par,
                         original_data
                     FROM quetes
                     ORDER BY RANDOM()
