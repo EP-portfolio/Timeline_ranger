@@ -288,6 +288,18 @@ async def play_color_action(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Cette action nécessite une carte Troupe",
                 )
+            
+            # Vérifier les conditions de la carte
+            conditions_valid, conditions_error = GameLogic.check_card_conditions(
+                card=selected_card,
+                player_state=player_state,
+                game_state=game_state,
+            )
+            if not conditions_valid:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Conditions non remplies : {conditions_error}",
+                )
 
             # Vérifier les prérequis : construction de taille >= taille troupe et inoccupée
             troupe_size = selected_card.get("size", 0)
