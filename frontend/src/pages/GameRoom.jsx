@@ -508,10 +508,7 @@ const GameRoom = () => {
                   onClick={() => handleCardSelect(card.id)}
                   style={{ backgroundColor: getCardColorByType(card.type) }}
                 >
-                  <div className="card-name">{card.name}</div>
-                  <div className="card-type">{card.type}</div>
-                  <div className="card-cost">Coût: {card.cost}</div>
-                  {card.size && <div className="card-size">Taille: {card.size}</div>}
+                  <CardDetail card={card} />
                 </div>
               ))}
             </div>
@@ -554,10 +551,7 @@ const GameRoom = () => {
                       onClick={() => handleSelectCardFromHand(card.id)}
                       style={{ backgroundColor: getCardColorByType(card.type) }}
                     >
-                      <div className="card-name">{card.name}</div>
-                      <div className="card-type">{card.type}</div>
-                      <div className="card-cost">Coût: {card.cost}</div>
-                      {card.size && <div className="card-size">Taille: {card.size}</div>}
+                      <CardDetail card={card} />
                     </div>
                   ))}
                 </div>
@@ -677,10 +671,7 @@ const GameRoom = () => {
                   className="card-item"
                   style={{ backgroundColor: getCardColorByType(card.type) }}
                 >
-                  <div className="card-name">{card.name}</div>
-                  <div className="card-type">{card.type}</div>
-                  <div className="card-cost">Coût: {card.cost}</div>
-                  {card.size && <div className="card-size">Taille: {card.size}</div>}
+                  <CardDetail card={card} />
                 </div>
               ))}
             </div>
@@ -727,6 +718,168 @@ function getCardColorByType(cardType) {
     mecenes: '#3b82f6',     // Bleu - Ranger Mécène (alias pour technologies)
   }
   return cardTypeColors[cardType] || '#2a2a2a' // Par défaut gris foncé
+}
+
+// Composant pour afficher tous les détails d'une carte
+function CardDetail({ card }) {
+  return (
+    <>
+      <div className="card-header">
+        <div className="card-name">{card.name}</div>
+        <div className="card-type">{card.type}</div>
+      </div>
+      
+      <div className="card-body">
+        {/* Coût */}
+        {card.cost !== undefined && card.cost !== null && (
+          <div className="card-section">
+            <div className="card-cost">{card.cost} PO</div>
+          </div>
+        )}
+
+        {/* Niveau (pour technologies) */}
+        {card.level && (
+          <div className="card-level">Niveau {card.level}</div>
+        )}
+
+        {/* Taille (pour troupes) */}
+        {card.size !== undefined && card.size !== null && (
+          <div className="card-section">
+            <div className="card-size">Taille: {card.size}</div>
+          </div>
+        )}
+
+        {/* Statistiques */}
+        <div className="card-stats">
+          {card.points_degats !== undefined && card.points_degats !== null && card.points_degats > 0 && (
+            <div className="card-stat">
+              <span className="card-stat-label">Dégâts:</span>
+              <span className="card-stat-value stat-damage">⚔️ {card.points_degats}</span>
+            </div>
+          )}
+          
+          {card.nombre_lasers !== undefined && card.nombre_lasers !== null && card.nombre_lasers > 0 && (
+            <div className="card-stat">
+              <span className="card-stat-label">Lasers:</span>
+              <span className="card-stat-value stat-laser">🔵 {card.nombre_lasers}</span>
+            </div>
+          )}
+          
+          {card.points_developpement_technique !== undefined && card.points_developpement_technique !== null && card.points_developpement_technique > 0 && (
+            <div className="card-stat">
+              <span className="card-stat-label">Réputation:</span>
+              <span className="card-stat-value stat-reputation">⭐ {card.points_developpement_technique}</span>
+            </div>
+          )}
+          
+          {card.paires_ailes !== undefined && card.paires_ailes !== null && card.paires_ailes > 0 && (
+            <div className="card-stat">
+              <span className="card-stat-label">Ailes:</span>
+              <span className="card-stat-value stat-wings">🪽 {card.paires_ailes}</span>
+            </div>
+          )}
+          
+          {card.or_par_jour !== undefined && card.or_par_jour !== null && card.or_par_jour > 0 && (
+            <div className="card-stat">
+              <span className="card-stat-label">Or/jour:</span>
+              <span className="card-stat-value stat-gold">💰 {card.or_par_jour}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Matières premières requises */}
+        {card.raw_materials_required && Array.isArray(card.raw_materials_required) && card.raw_materials_required.length > 0 && (
+          <div className="card-materials">
+            <div className="card-section-title">Matériaux requis</div>
+            {card.raw_materials_required.map((material, idx) => (
+              <div key={idx} className="card-material-item">
+                • {material.material_name || material.material_id}: {material.quantity}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Type d'arme (pour troupes) */}
+        {card.weapon_type && (
+          <div className="card-section">
+            <div className="card-section-title">Type d'arme</div>
+            <div className="card-material-item">{card.weapon_type}</div>
+          </div>
+        )}
+
+        {/* Type de pièce d'armure (pour technologies) */}
+        {card.armor_piece_type && (
+          <div className="card-section">
+            <div className="card-section-title">Type de pièce</div>
+            <div className="card-material-item">{card.armor_piece_type}</div>
+          </div>
+        )}
+
+        {/* Type de quête (pour quêtes) */}
+        {card.quest_type && (
+          <div className="card-section">
+            <div className="card-section-title">Type de quête</div>
+            <div className="card-material-item">{card.quest_type}</div>
+          </div>
+        )}
+
+        {/* Conditions (pour quêtes) */}
+        {card.conditions && typeof card.conditions === 'object' && Object.keys(card.conditions).length > 0 && (
+          <div className="card-conditions">
+            <div className="card-section-title">Conditions</div>
+            {Object.entries(card.conditions).map(([key, value], idx) => (
+              <div key={idx} className="card-condition-item">
+                {key}: {typeof value === 'object' ? JSON.stringify(value) : value}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Récompenses (pour quêtes) */}
+        {card.rewards && typeof card.rewards === 'object' && Object.keys(card.rewards).length > 0 && (
+          <div className="card-section">
+            <div className="card-section-title">Récompenses</div>
+            {Object.entries(card.rewards).map(([key, value], idx) => (
+              <div key={idx} className="card-material-item">
+                {key}: {typeof value === 'object' ? JSON.stringify(value) : value}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Effets */}
+        <div className="card-effects">
+          {card.bonus && (
+            <div className="card-effect">
+              <div className="card-effect-title">Bonus</div>
+              <div className="card-effect-text">{card.bonus}</div>
+            </div>
+          )}
+          
+          {card.effet_invocation && (
+            <div className="card-effect">
+              <div className="card-effect-title">Effet d'invocation</div>
+              <div className="card-effect-text">{card.effet_invocation}</div>
+            </div>
+          )}
+          
+          {card.effet_quotidien && (
+            <div className="card-effect">
+              <div className="card-effect-title">Effet quotidien</div>
+              <div className="card-effect-text">{card.effet_quotidien}</div>
+            </div>
+          )}
+          
+          {card.dernier_souffle && (
+            <div className="card-effect">
+              <div className="card-effect-title">Dernier souffle</div>
+              <div className="card-effect-text">{card.dernier_souffle}</div>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  )
 }
 
 // Composant pour afficher la grille hexagonale
