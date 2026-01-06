@@ -21,6 +21,7 @@ const GameRoom = () => {
   const [selectedTile, setSelectedTile] = useState(null) // Tuile choisie
   const [tileRotation, setTileRotation] = useState(0) // Rotation de la tuile (multiples de 60°)
   const [previewPosition, setPreviewPosition] = useState(null) // { q, r } pour prévisualisation
+  const [isStartingGame, setIsStartingGame] = useState(false)
 
   useEffect(() => {
     loadGameState()

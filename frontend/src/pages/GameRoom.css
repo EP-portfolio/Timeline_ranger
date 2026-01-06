@@ -31,8 +31,18 @@
   transition: background 0.2s;
 }
 
-.start-game-button:hover {
+.start-game-button:hover:not(:disabled) {
   background: #059669;
+}
+
+.start-game-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #6b7280;
+}
+
+.start-game-button:disabled:hover {
+  background: #6b7280;
 }
 
 .waiting-badge {
