@@ -129,14 +129,31 @@ const GameRoom = () => {
     }
   }
 
+  const [isStartingGame, setIsStartingGame] = useState(false)
+
   const handleStartGame = async () => {
+    // Empêcher les doubles clics
+    if (isStartingGame || gameState?.status === 'started') {
+      return
+    }
+
+    setIsStartingGame(true)
     try {
       await gamesAPI.start(id)
       loadGameState() // Recharger l'état après démarrage
       loadGameInfo()
     } catch (error) {
       console.error('Erreur démarrage partie:', error)
-      alert(error.response?.data?.detail || 'Erreur lors du démarrage de la partie')
+      // Si la partie est déjà démarrée, c'est OK (peut arriver avec double clic)
+      if (error.response?.status === 400 && error.response?.data?.detail?.includes('déjà été démarrée')) {
+        // Recharger l'état pour être à jour
+        loadGameState()
+        loadGameInfo()
+      } else {
+        alert(error.response?.data?.detail || 'Erreur lors du démarrage de la partie')
+      }
+    } finally {
+      setIsStartingGame(false)
     }
   }
 
