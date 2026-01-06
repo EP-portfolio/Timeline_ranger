@@ -130,8 +130,6 @@ const GameRoom = () => {
     }
   }
 
-  const [isStartingGame, setIsStartingGame] = useState(false)
-
   const handleStartGame = async () => {
     // Empêcher les doubles clics
     if (isStartingGame || gameState?.status === 'started') {
