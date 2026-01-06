@@ -13,7 +13,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000, // 10 secondes de timeout
+  timeout: 30000, // 30 secondes de timeout (augmenté pour les connexions lentes)
 })
 
 // Intercepteur pour ajouter le token à chaque requête
@@ -50,9 +50,23 @@ api.interceptors.response.use(
       window.location.href = '/login'
     }
 
-    // Gestion des erreurs réseau
-    if (error.code === 'ECONNABORTED' || error.message === 'Network Error') {
+    // Gestion des erreurs réseau et timeout
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
       console.error('🌐 Erreur réseau - Vérifier CORS et URL API')
+      // Ne pas rejeter immédiatement pour les timeouts, permettre une retry
+      if (error.config && !error.config._retry) {
+        error.config._retry = true
+        // Retry une fois après 2 secondes
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(api.request(error.config))
+          }, 2000)
+        })
+      }
+    }
+    
+    if (error.message === 'Network Error') {
+      console.error('🌐 Erreur réseau - Vérifier la connexion internet et l\'URL API')
     }
 
     return Promise.reject(error)

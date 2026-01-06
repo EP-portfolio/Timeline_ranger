@@ -776,9 +776,6 @@ function getCardColorByType(cardType) {
 
 // Composant pour afficher tous les détails d'une carte
 function CardDetail({ card }) {
-  const cardBackgroundColor = getCardColorByType(card.type)
-  const textColor = getContrastColor(cardBackgroundColor)
-
   return (
     <div className="ark-nova-card">
       {/* Badge factice */}
