@@ -206,6 +206,71 @@ class TimelineRangerImporter:
         
         return original_name
     
+    def parse_enclos(self, row: pd.Series) -> Dict:
+        """Parse les colonnes d'enclos pour déterminer type_garnison, garnison_standard_minimum, adjacences."""
+        result = {
+            'type_garnison': None,
+            'garnison_standard_minimum': False,
+            'garnison_sans_adjacence': False,
+            'adjacent_lave': False,
+            'adjacent_vide': False
+        }
+        
+        # Enclos standard (minimum)
+        if pd.notna(row.get('Enclos standard (minimum)')):
+            result['garnison_standard_minimum'] = True
+        
+        # Enclos sans adjacence case
+        if pd.notna(row.get('Enclos sans adjacence case')):
+            result['garnison_sans_adjacence'] = True
+        
+        # Adjacent case Rocher → adjacent_lave
+        if pd.notna(row.get('Adjacent case Rocher')):
+            result['adjacent_lave'] = True
+        
+        # Adjacent case Eau → adjacent_vide
+        if pd.notna(row.get('Adjacent case Eau')):
+            result['adjacent_vide'] = True
+        
+        # Type de garnison (Vivarium, Grande volière, Aquarium, Parc animalier)
+        if pd.notna(row.get('Vivarium à reptiles')):
+            result['type_garnison'] = 'Vivarium'
+        elif pd.notna(row.get('Grande volière')):
+            result['type_garnison'] = 'Grande volière'
+        elif pd.notna(row.get('Aquarium')):
+            result['type_garnison'] = 'Aquarium'
+        elif pd.notna(row.get('Parc animalier')):
+            result['type_garnison'] = 'Parc animalier'
+        elif pd.notna(row.get('Enclos')):
+            # Parser "Enclos" pour déterminer le type
+            enclos = str(row.get('Enclos', ''))
+            if 'Parc' in enclos:
+                result['type_garnison'] = 'Parc animalier'
+            elif 'Aquarium' in enclos:
+                result['type_garnison'] = 'Aquarium'
+            elif 'Volière' in enclos:
+                result['type_garnison'] = 'Grande volière'
+            elif 'Vivarium' in enclos:
+                result['type_garnison'] = 'Vivarium'
+        
+        return result
+    
+    def parse_conditions(self, row: pd.Series, column_name: str) -> Optional[Dict]:
+        """Parse les conditions depuis une colonne."""
+        if pd.isna(row.get(column_name)):
+            return None
+        
+        conditions_text = str(row.get(column_name, ''))
+        if not conditions_text or conditions_text.strip() == '':
+            return None
+        
+        # Pour l'instant, stocker le texte brut dans un JSONB
+        # On pourra parser plus tard selon les besoins
+        return {
+            'texte': conditions_text,
+            'raw': conditions_text
+        }
+    
     def import_troupes(self, ods_file: str):
         """Importe les troupes (ex-Animaux) depuis l'ODS."""
         print("Import des troupes (Animaux)...")
@@ -215,22 +280,39 @@ class TimelineRangerImporter:
         troupes = []
         for _, row in df.iterrows():
             card_number = self._safe_int(row.get('N° Carte', 0), 0)
-            original_name = str(row.get('Nom', ''))
+            if card_number == 0:
+                continue  # Ignorer les lignes sans numéro de carte
             
-            # Obtenir le nom mappé
-            category = str(row.get('Catégorie', ''))
+            # Nom Animal → mapped_name (nom mappé)
+            original_name = str(row.get('Nom Animal', ''))
+            if not original_name or original_name.strip() == '':
+                continue
+            
+            # Obtenir le nom mappé depuis la catégorie
+            category = str(row.get('Catégorie(s) d\'animal (icônes en haut à droite)', ''))
             weapon_type_code = WEAPON_TYPE_MAPPING.get(category.split(';')[0].strip(), 'Arme')
             mapped_name = f"{weapon_type_code.replace('_', ' ').title()} - {original_name}"
             
             # Obtenir le type d'arme
             weapon_type_id = self.get_weapon_type_id(category)
             
-            # Mapper les points
-            points = self.map_points(row)
+            # Mapper les points (utiliser les colonnes individuelles)
+            points = {
+                'points_degats': self._safe_int(row.get('Points Attrait', 0), 0),
+                'nombre_lasers': self._safe_int(row.get('Points Conservation', 0), 0),
+                'points_developpement_technique': self._safe_int(row.get('Points Réputation', 0), 0),
+                'paires_ailes': 0  # Points Science n'existe pas dans cette feuille
+            }
             
-            # Obtenir les matières premières
-            continents = str(row.get('Continent(s) d\'origine', ''))
+            # Obtenir les matières premières depuis Continent(s) d'origine
+            continents = str(row.get('Continent(s) d\'origine (icônes en haut à droite)', ''))
             raw_materials = self.get_raw_materials(continents)
+            
+            # Parser les informations d'enclos
+            enclos_info = self.parse_enclos(row)
+            
+            # Conditions
+            conditions = self.parse_conditions(row, 'Condition(s) (icônes à gauche sur un bandeau rouge)')
             
             # Créer l'objet troupe
             troupe = {
@@ -247,9 +329,20 @@ class TimelineRangerImporter:
                 'raw_materials_required': Json(raw_materials),
                 'original_data': Json(self._clean_dict_for_json(row.to_dict())),
                 'bonus': str(row.get('Capacité', '')) if pd.notna(row.get('Capacité')) else None,
-                'effet_invocation': str(row.get('Effet unique immédiat (fond jaune)', '')) if pd.notna(row.get('Effet unique immédiat (fond jaune)', None)) else None,
-                'effet_quotidien': str(row.get('Effet permanent/récurrent (fond bleu)', '')) if pd.notna(row.get('Effet permanent/récurrent (fond bleu)', None)) else None,
-                'dernier_souffle': str(row.get('Effet (unique) de fin de partie [lors du décompte final] (fond marron)', '')) if pd.notna(row.get('Effet (unique) de fin de partie [lors du décompte final] (fond marron)', None)) else None,
+                'effet_du_vide': str(row.get('Effet Corallien', '')) if pd.notna(row.get('Effet Corallien')) else None,
+                'effet_invocation': None,  # Pas dans cette feuille
+                'effet_quotidien': None,  # Pas dans cette feuille
+                'dernier_souffle': None,  # Pas dans cette feuille
+                'type_garnison': enclos_info['type_garnison'],
+                'garnison_standard_minimum': enclos_info['garnison_standard_minimum'],
+                'garnison_sans_adjacence': enclos_info['garnison_sans_adjacence'],
+                'adjacent_lave': enclos_info['adjacent_lave'],
+                'adjacent_vide': enclos_info['adjacent_vide'],
+                'conditions': Json(conditions) if conditions else None,
+                'vague': str(row.get('Vague', '')) if pd.notna(row.get('Vague')) else None,
+                'jeu_base': True if pd.notna(row.get('Jeu de base')) else False,
+                'jeu_mondes_marins': True if pd.notna(row.get('Jeu avec extension Mondes Marins')) else False,
+                'promo': True if pd.notna(row.get('Promo')) else False,
             }
             
             troupes.append(troupe)
@@ -259,8 +352,10 @@ class TimelineRangerImporter:
         INSERT INTO troupes (
             card_number, original_name, mapped_name, weapon_type_id, size, cost,
             points_degats, nombre_lasers, points_developpement_technique, paires_ailes,
-            raw_materials_required, original_data, bonus, effet_invocation,
-            effet_quotidien, dernier_souffle
+            raw_materials_required, original_data, bonus, effet_du_vide,
+            type_garnison, garnison_standard_minimum, garnison_sans_adjacence,
+            adjacent_lave, adjacent_vide, conditions, vague, jeu_base,
+            jeu_mondes_marins, promo
         ) VALUES %s
         ON CONFLICT (card_number) DO UPDATE
         SET mapped_name = EXCLUDED.mapped_name,
@@ -274,9 +369,17 @@ class TimelineRangerImporter:
             raw_materials_required = EXCLUDED.raw_materials_required,
             original_data = EXCLUDED.original_data,
             bonus = EXCLUDED.bonus,
-            effet_invocation = EXCLUDED.effet_invocation,
-            effet_quotidien = EXCLUDED.effet_quotidien,
-            dernier_souffle = EXCLUDED.dernier_souffle,
+            effet_du_vide = EXCLUDED.effet_du_vide,
+            type_garnison = EXCLUDED.type_garnison,
+            garnison_standard_minimum = EXCLUDED.garnison_standard_minimum,
+            garnison_sans_adjacence = EXCLUDED.garnison_sans_adjacence,
+            adjacent_lave = EXCLUDED.adjacent_lave,
+            adjacent_vide = EXCLUDED.adjacent_vide,
+            conditions = EXCLUDED.conditions,
+            vague = EXCLUDED.vague,
+            jeu_base = EXCLUDED.jeu_base,
+            jeu_mondes_marins = EXCLUDED.jeu_mondes_marins,
+            promo = EXCLUDED.promo,
             updated_at = NOW()
         """
         
@@ -285,13 +388,43 @@ class TimelineRangerImporter:
             t['size'], t['cost'], t['points_degats'], t['nombre_lasers'],
             t['points_developpement_technique'], t['paires_ailes'],
             t['raw_materials_required'], t['original_data'], t['bonus'],
-            t['effet_invocation'], t['effet_quotidien'], t['dernier_souffle']
+            t['effet_du_vide'], t['type_garnison'], t['garnison_standard_minimum'],
+            t['garnison_sans_adjacence'], t['adjacent_lave'], t['adjacent_vide'],
+            t['conditions'], t['vague'], t['jeu_base'],
+            t['jeu_mondes_marins'], t['promo']
         ) for t in troupes]
         
         execute_values(self.cur, insert_query, values)
         self.conn.commit()
         
         print(f"[OK] {len(troupes)} troupes importees")
+    
+    def parse_points_combined(self, row: pd.Series) -> Dict:
+        """Parse la colonne 'Points Attrait/Conservation/Réputation' combinée."""
+        points = {
+            'points_degats': 0,
+            'nombre_lasers': 0,
+            'points_developpement_technique': 0,
+            'paires_ailes': 0
+        }
+        
+        # Essayer d'abord les colonnes individuelles
+        if 'Points Attrait' in row and pd.notna(row.get('Points Attrait')):
+            points['points_degats'] = self._safe_int(row.get('Points Attrait', 0), 0)
+        
+        if 'Points Conservation' in row and pd.notna(row.get('Points Conservation')):
+            points['nombre_lasers'] = self._safe_int(row.get('Points Conservation', 0), 0)
+        
+        if 'Points Réputation' in row and pd.notna(row.get('Points Réputation')):
+            points['points_developpement_technique'] = self._safe_int(row.get('Points Réputation', 0), 0)
+        
+        # Si la colonne combinée existe, essayer de la parser
+        if 'Points Attrait/Conservation/Réputation' in row and pd.notna(row.get('Points Attrait/Conservation/Réputation')):
+            combined = str(row.get('Points Attrait/Conservation/Réputation', ''))
+            # Parser le format "X Attrait, Y Conservation, Z Réputation"
+            # À adapter selon le format réel
+        
+        return points
     
     def import_technologies(self, ods_file: str):
         """Importe les technologies (ex-Mécènes) depuis l'ODS."""
@@ -315,18 +448,32 @@ class TimelineRangerImporter:
         technologies = []
         for _, row in df.iterrows():
             card_number = self._safe_int(row.get('N° Carte', 0), 0)
-            original_name = str(row.get('Nom', ''))
+            if card_number == 0:
+                continue
+            
+            original_name = str(row.get('Nom Mécène', ''))
+            if not original_name or original_name.strip() == '':
+                continue
+            
+            # Nom mappé (utiliser original_name directement comme mapped_name pour l'instant)
+            mapped_name = original_name
             
             # Déterminer si c'est une pièce d'armure ou une action
             # (basé sur l'effet - à adapter selon vos critères)
             is_armor_piece = False  # À déterminer selon les effets
             armor_piece_type = None
             
-            # Nom mappé
-            mapped_name = f"Système {original_name}"  # Par défaut
+            # Niveau → niveau requis du Ranger Bleu
+            level = self._safe_int(row.get('Niveau', 0), None) if pd.notna(row.get('Niveau')) else None
             
-            # Mapper les points
-            points = self.map_points(row)
+            # Mapper les points (utiliser la fonction combinée)
+            points = self.parse_points_combined(row)
+            
+            # Conditions
+            conditions = self.parse_conditions(row, 'Condition(s) (icônes à gauche sur un bandeau rouge)')
+            
+            # Icône(s) obtenue(s) → bonus
+            bonus = str(row.get('Icône(s) obtenue(s) (icônes en haut à droite)', '')) if pd.notna(row.get('Icône(s) obtenue(s) (icônes en haut à droite)')) else None
             
             technology = {
                 'card_number': card_number,
@@ -334,14 +481,24 @@ class TimelineRangerImporter:
                 'mapped_name': mapped_name,
                 'is_armor_piece': is_armor_piece,
                 'armor_piece_type': armor_piece_type,
-                'level': self._safe_int(row.get('Niveau', 0), None) if pd.notna(row.get('Niveau')) else None,
+                'level': level,
                 'points_degats': points['points_degats'],
                 'nombre_lasers': points['nombre_lasers'],
                 'points_developpement_technique': points['points_developpement_technique'],
                 'paires_ailes': points['paires_ailes'],
-                'cost': self._safe_int(row.get('Crédits', 0), 0),
+                'cost': level,  # Pour technologies, cost = niveau requis (level)
                 'or_par_jour': self._safe_int(row.get('Revenus (fond violet)', 0), 0),
+                'bonus': bonus,
+                'effet_invocation': str(row.get('Effet unique immédiat (fond jaune)', '')) if pd.notna(row.get('Effet unique immédiat (fond jaune)')) else None,
+                'effet_quotidien': str(row.get('Effet permanent/récurrent (fond bleu)', '')) if pd.notna(row.get('Effet permanent/récurrent (fond bleu)')) else None,
+                'dernier_souffle': str(row.get('Effet (unique) de fin de partie [lors du décompte final] (fond marron)', '')) if pd.notna(row.get('Effet (unique) de fin de partie [lors du décompte final] (fond marron)')) else None,
+                'conditions': Json(conditions) if conditions else None,
                 'original_data': Json(self._clean_dict_for_json(row.to_dict())),
+                'vague': str(row.get('Vague', '')) if pd.notna(row.get('Vague')) else None,
+                'jeu_base': True if pd.notna(row.get('Jeu de base')) else False,
+                'jeu_mondes_marins': True if pd.notna(row.get('Jeu avec extension Mondes Marins')) else False,
+                'promo': True if pd.notna(row.get('Promo')) else False,
+                'remplacee_par': self._safe_int(row.get('Remplacée par extension Mondes Marins', 0), None) if pd.notna(row.get('Remplacée par extension Mondes Marins')) else None,
             }
             
             technologies.append(technology)
@@ -380,6 +537,75 @@ class TimelineRangerImporter:
         
         print(f"[OK] {len(technologies)} technologies importees")
     
+    def parse_recompenses(self, row: pd.Series) -> Dict:
+        """Parse les récompenses depuis les colonnes Récompense(s)."""
+        rewards = {
+            'conservation': None,
+            'condition_taille_animal': None,
+            'reputation': None,
+            'autre': None,
+            'texte_complet': None
+        }
+        
+        # Récompense(s) - texte complet
+        if pd.notna(row.get('Récompense(s)')):
+            rewards['texte_complet'] = str(row.get('Récompense(s)', ''))
+        
+        # Récompense Conservation
+        if pd.notna(row.get('Récompense Conservation')):
+            rewards['conservation'] = str(row.get('Récompense Conservation', ''))
+        
+        # Récompense Condition Taille animal
+        if pd.notna(row.get('Récompense Condition Taille animal')):
+            rewards['condition_taille_animal'] = str(row.get('Récompense Condition Taille animal', ''))
+        
+        # Récompense Réputation
+        if pd.notna(row.get('Récompense Réputation')):
+            rewards['reputation'] = str(row.get('Récompense Réputation', ''))
+        
+        # Récompense …
+        if pd.notna(row.get('Récompense …')):
+            rewards['autre'] = str(row.get('Récompense …', ''))
+        
+        return rewards
+    
+    def parse_prerequis(self, row: pd.Series) -> Dict:
+        """Parse tous les prérequis depuis les colonnes Prérequis*."""
+        prerequis = {
+            'texte': None,
+            'nb_icones': None,
+            'icones': None,
+            'categorie_continent_animal': None,
+            'zoo_partenaire': None,
+            'specific_requirements': None
+        }
+        
+        # Prérequis (texte) → conditions détaillées
+        if pd.notna(row.get('Prérequis (texte)')):
+            prerequis['texte'] = str(row.get('Prérequis (texte)', ''))
+        
+        # Prérequis Nb. icônes
+        if pd.notna(row.get('Prérequis Nb. icônes')):
+            prerequis['nb_icones'] = str(row.get('Prérequis Nb. icônes', ''))
+        
+        # Prérequis Icônes
+        if pd.notna(row.get('Prérequis Icônes')):
+            prerequis['icones'] = str(row.get('Prérequis Icônes', ''))
+        
+        # Prérequis Catégorie/Continent Animal
+        if pd.notna(row.get('Prérequis Catégorie/Continent Animal')):
+            prerequis['categorie_continent_animal'] = str(row.get('Prérequis Catégorie/Continent Animal', ''))
+        
+        # Prérequis Zoo partenaire
+        if pd.notna(row.get('Prérequis Zoo partenaire')):
+            prerequis['zoo_partenaire'] = str(row.get('Prérequis Zoo partenaire', ''))
+        
+        # Specific Requirements
+        if pd.notna(row.get('Specific Requirements')):
+            prerequis['specific_requirements'] = str(row.get('Specific Requirements', ''))
+        
+        return prerequis
+    
     def import_quetes(self, ods_file: str):
         """Importe les quêtes (ex-Projets de Conservation) depuis l'ODS."""
         print("Import des quêtes (Projets de Conservation)...")
@@ -401,18 +627,38 @@ class TimelineRangerImporter:
         quetes = []
         for _, row in df.iterrows():
             card_number = self._safe_int(row.get('N° Carte', 0), 0)
-            original_name = str(row.get('Nom', ''))
+            if card_number == 0:
+                continue
+            
+            original_name = str(row.get('Nom Projet de conservation', ''))
+            if not original_name or original_name.strip() == '':
+                continue
+            
             mapped_name = f"Quête : {original_name}"
+            
+            # Parser les prérequis (conditions)
+            prerequis = self.parse_prerequis(row)
+            
+            # Parser les récompenses
+            recompenses = self.parse_recompenses(row)
+            
+            # Bonus (en bas à droite) gagné par le joueur posant la carte
+            bonus = str(row.get('Bonus (en bas à droite) gagné par le joueur posant la carte', '')) if pd.notna(row.get('Bonus (en bas à droite) gagné par le joueur posant la carte')) else None
             
             quete = {
                 'card_number': card_number,
                 'original_name': original_name,
                 'mapped_name': mapped_name,
-                'quest_type': 'maitrise',  # À déterminer selon le type
+                'quest_type': 'maitrise',  # À déterminer selon le type (Activity Required)
                 'condition_type': str(row.get('Type de condition (texte)', '')) if pd.notna(row.get('Type de condition (texte)', None)) else None,
-                'conditions': Json({}),
-                'rewards': Json({}),
+                'conditions': Json(prerequis),
+                'rewards': Json(recompenses),
+                'bonus': bonus,
                 'original_data': Json(self._clean_dict_for_json(row.to_dict())),
+                'vague': str(row.get('Vague', '')) if pd.notna(row.get('Vague')) else None,
+                'jeu_base': True if pd.notna(row.get('Jeu de base')) else False,
+                'jeu_mondes_marins': True if pd.notna(row.get('Jeu avec extension Mondes Marins')) else False,
+                'remplacee_par': self._safe_int(row.get('Remplacée par extension Mondes Marins', 0), None) if pd.notna(row.get('Remplacée par extension Mondes Marins')) else None,
             }
             
             quetes.append(quete)
