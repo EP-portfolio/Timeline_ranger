@@ -712,6 +712,28 @@
   font-weight: 700;
 }
 
+.no-playable-cards {
+  padding: 1.5rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 2px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.no-playable-cards p {
+  color: #fca5a5;
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+.no-playable-cards .hint {
+  color: #aaa;
+  font-size: 0.85rem;
+  font-style: italic;
+  margin-top: 0.75rem;
+}
+
 .card-level-required {
   color: #3b82f6;
   font-size: 0.95rem;

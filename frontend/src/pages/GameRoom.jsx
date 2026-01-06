@@ -266,15 +266,20 @@ const GameRoom = () => {
 
     // Bleu (Mécène) : peut jouer des cartes Technologie dont le niveau requis (cost) <= puissance du Ranger
     if (color === 'blue') {
-      return myPlayerState.hand.filter(card => {
-        // Pour les technologies, le "cost" représente le niveau requis
+      const playableCards = myPlayerState.hand.filter(card => {
+        // Pour les technologies, le "cost" représente le niveau requis du Ranger Bleu
         if (card.type === 'technology') {
           const levelRequired = card.cost || card.level || 0
-          return levelRequired <= power
+          // Le niveau requis doit être <= puissance du Ranger Bleu
+          const isPlayable = levelRequired <= power
+          console.log(`[DEBUG] Carte ${card.name} (type: ${card.type}): niveau requis=${levelRequired}, Ranger Bleu niveau=${power}, jouable=${isPlayable}`)
+          return isPlayable
         }
         // Les autres types de cartes ne sont pas jouables avec l'action Bleue
         return false
       })
+      console.log(`[DEBUG] Action Bleue niveau ${power}: ${playableCards.length} carte(s) technologie jouable(s) sur ${myPlayerState.hand.filter(c => c.type === 'technology').length} technologie(s) en main`)
+      return playableCards
     }
 
     // Noir (Animaux) : peut jouer des cartes Troupe
@@ -552,7 +557,38 @@ const GameRoom = () => {
               {selectedAction.color === 'yellow' && 'Action Cartes (pas de carte nécessaire)'}
             </p>
 
-            {getPlayableCards().length > 0 && (
+            {selectedAction.color === 'blue' && (
+              <div className="playable-cards-section">
+                {getPlayableCards().length > 0 ? (
+                  <>
+                    <h4>Cartes Technologie jouables (niveau requis ≤ {selectedAction.power}) :</h4>
+                    <div className="cards-grid">
+                      {getPlayableCards().map((card) => {
+                        const levelRequired = card.cost || card.level || 0
+                        return (
+                          <div
+                            key={card.id}
+                            className={`card-item ${selectedCardFromHand === card.id ? 'selected' : ''}`}
+                            onClick={() => handleSelectCardFromHand(card.id)}
+                            style={{ backgroundColor: getCardColorByType(card.type) }}
+                            title={`Niveau requis: ${levelRequired} (Ranger Bleu niveau ${selectedAction.power})`}
+                          >
+                            <CardDetail card={card} />
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </>
+                ) : (
+                  <div className="no-playable-cards">
+                    <p>⚠️ Aucune carte Technologie jouable avec le Ranger Bleu niveau {selectedAction.power}</p>
+                    <p className="hint">Les cartes Technologie nécessitent un niveau de Ranger Bleu supérieur ou égal à leur niveau requis.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {selectedAction.color !== 'blue' && getPlayableCards().length > 0 && (
               <div className="playable-cards-section">
                 <h4>Cartes jouables :</h4>
                 <div className="cards-grid">
@@ -567,6 +603,12 @@ const GameRoom = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {selectedAction.color !== 'blue' && getPlayableCards().length === 0 && (
+              <div className="no-playable-cards">
+                <p>⚠️ Aucune carte jouable pour cette action</p>
               </div>
             )}
 
