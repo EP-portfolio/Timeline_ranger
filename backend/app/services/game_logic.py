@@ -167,9 +167,24 @@ class GameLogic:
                     }
                 )
             elif card_type == "technology":
+                # Générer le niveau et le niveau requis (cost) pour les technologies
+                level = random.randint(1, 3)
+                level_required = random.randint(1, 5)  # Niveau requis du Ranger Bleu (1-5)
+                
+                # Pour les technologies, le niveau requis (cost) doit être >= niveau de la carte
+                # et représente le niveau minimum du Ranger Bleu nécessaire
+                if level_required < level:
+                    level_required = level
+                
+                # Modifier le nom de la carte pour inclure le niveau requis (pour éviter les doublons)
+                # Format: "Système - Laser (Niveau requis: X)"
+                unique_card_name = f"{card_name} (Niveau requis: {level_required})"
+                
                 card.update(
                     {
-                        "level": random.randint(1, 3),
+                        "name": unique_card_name,  # Mettre à jour le nom avec le niveau requis pour unicité
+                        "level": level,
+                        "cost": level_required,  # Le cost représente le niveau requis pour les technologies
                         "points_degats": random.randint(0, 2),
                         "nombre_lasers": random.randint(0, 1),
                         "points_developpement_technique": random.randint(0, 2),
