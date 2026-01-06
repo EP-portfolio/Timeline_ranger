@@ -509,7 +509,7 @@ class GameLogic:
         for player in players:
             # S'assurer que player_number est un int
             player_number = int(player["player_number"])
-            
+
             # Générer 8 cartes initiales pour chaque joueur
             initial_cards = GameLogic.generate_initial_cards(8)
 
@@ -517,7 +517,11 @@ class GameLogic:
                 "player_id": int(player["id"]),
                 "user_id": int(player["user_id"]),
                 "player_number": player_number,
-                "armure_meca_id": int(player["armure_meca_id"]) if player.get("armure_meca_id") else None,
+                "armure_meca_id": (
+                    int(player["armure_meca_id"])
+                    if player.get("armure_meca_id")
+                    else None
+                ),
                 "rangers": [r.copy() for r in rangers],  # Deep copy des Rangers
                 "initial_hand": initial_cards,  # 8 cartes initiales à sélectionner
                 "hand": [],  # Cartes en main après sélection (4 cartes)

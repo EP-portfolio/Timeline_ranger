@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     
     # Database Supabase
     SUPABASE_HOST: str
+    SUPABASE_POOLER_HOST: Optional[str] = None  # Permet de spécifier l'host du pooler si différent
+    SUPABASE_HOST_IPV4: Optional[str] = None    # Permet de forcer l'IPv4 si l'IPv6 est inaccessible
     SUPABASE_DB: str = "postgres"
     SUPABASE_USER: str = "postgres"
     SUPABASE_PASSWORD: str
