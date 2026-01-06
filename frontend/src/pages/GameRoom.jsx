@@ -1258,6 +1258,10 @@ function HexGrid({ hexagons, garnisons, weapons, tokens, specialZones, selectedA
         className="hex-grid-svg"
         viewBox="0 0 800 600"
         preserveAspectRatio="xMidYMid meet"
+        style={{
+          display: 'block',
+          margin: '0 auto'
+        }}
       >
         {hexagons.map((hex, index) => {
           const { x, y } = hexToPixel(hex.q, hex.r)
