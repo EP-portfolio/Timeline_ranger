@@ -889,6 +889,119 @@ class GameLogic:
         return True, ""
 
     @staticmethod
+    def check_card_conditions(
+        card: Dict[str, Any],
+        player_state: Dict[str, Any],
+        game_state: Optional[Dict[str, Any]] = None,
+    ) -> tuple[bool, str]:
+        """
+        Vérifie si les conditions d'une carte sont remplies pour pouvoir la jouer.
+        
+        Args:
+            card: La carte à vérifier (doit contenir 'conditions' en JSONB)
+            player_state: L'état du joueur
+            game_state: L'état du jeu (optionnel, pour vérifications globales)
+            
+        Returns:
+            Tuple (is_valid, error_message)
+            - is_valid: True si les conditions sont remplies
+            - error_message: Message d'erreur si les conditions ne sont pas remplies
+        """
+        # Si pas de conditions, la carte est jouable
+        if not card.get("conditions"):
+            return True, ""
+        
+        conditions = card["conditions"]
+        
+        # Si conditions est une string, essayer de la parser en JSON
+        if isinstance(conditions, str):
+            try:
+                import json
+                conditions = json.loads(conditions)
+            except:
+                # Si ce n'est pas du JSON valide, traiter comme texte brut
+                conditions = {"texte": conditions}
+        
+        # Vérifier le texte brut de la condition
+        if isinstance(conditions, dict):
+            # Vérifier les icônes requises
+            if "icones_requises" in conditions:
+                required_icons = conditions["icones_requises"]
+                player_icons = player_state.get("icons", [])
+                
+                for icon in required_icons:
+                    if icon not in player_icons:
+                        return False, f"Icône requise manquante : {icon}"
+            
+            # Vérifier le niveau minimum
+            if "niveau_minimum" in conditions:
+                required_level = conditions["niveau_minimum"]
+                # Vérifier le niveau du Ranger correspondant
+                ranger_level = 0
+                if card.get("type") == "technology":
+                    # Pour les technologies, vérifier le niveau du Ranger Bleu
+                    for ranger in player_state.get("rangers", []):
+                        if ranger.get("color") == "blue":
+                            ranger_level = ranger.get("power", 0)
+                            break
+                elif card.get("type") == "troupe":
+                    # Pour les troupes, vérifier le niveau du Ranger Noir
+                    for ranger in player_state.get("rangers", []):
+                        if ranger.get("color") == "black":
+                            ranger_level = ranger.get("power", 0)
+                            break
+                
+                if ranger_level < required_level:
+                    return False, f"Niveau minimum requis : {required_level} (votre niveau : {ranger_level})"
+            
+            # Vérifier les cartes requises sur le plateau
+            if "cartes_requises" in conditions:
+                required_cards = conditions["cartes_requises"]
+                board_cards = [c.get("id") for c in player_state.get("board", [])]
+                
+                for card_id in required_cards:
+                    if card_id not in board_cards:
+                        return False, f"Carte requise manquante sur le plateau : {card_id}"
+            
+            # Vérifier les ressources requises
+            if "ressources_requises" in conditions:
+                required_resources = conditions["ressources_requises"]
+                player_resources = player_state.get("resources", {})
+                
+                if "or" in required_resources:
+                    if player_resources.get("or", 0) < required_resources["or"]:
+                        return False, f"Or insuffisant (requis : {required_resources['or']}, vous avez : {player_resources.get('or', 0)})"
+                
+                if "materiaux" in required_resources:
+                    required_materials = required_resources["materiaux"]
+                    player_materials = player_resources.get("materiaux", {})
+                    
+                    for material in required_materials:
+                        material_id = material.get("material_id")
+                        quantity = material.get("quantity", 0)
+                        if player_materials.get(str(material_id), 0) < quantity:
+                            return False, f"Matériau insuffisant (ID: {material_id}, requis : {quantity})"
+            
+            # Vérifier le texte de condition (pour conditions complexes non structurées)
+            if "texte" in conditions:
+                condition_text = conditions["texte"]
+                # Pour l'instant, on accepte toutes les conditions textuelles
+                # TODO: Parser les conditions textuelles complexes
+                # Exemple : "Mécène II" → vérifier qu'on a déjà un Mécène de niveau 1
+                if "Mécène II" in condition_text:
+                    # Vérifier qu'on a déjà un Mécène de niveau 1 sur le plateau
+                    board_cards = player_state.get("board", [])
+                    has_level_1_mecene = False
+                    for board_card in board_cards:
+                        if board_card.get("type") == "technology" and board_card.get("level") == 1:
+                            has_level_1_mecene = True
+                            break
+                    if not has_level_1_mecene:
+                        return False, "Condition non remplie : Vous devez avoir un Mécène de niveau 1 sur le plateau"
+        
+        return True, ""
+    
+    @staticmethod
     def calculate_laser_damage_points(lasers: int) -> int:
         """
         Calcule les points de dégâts des lasers

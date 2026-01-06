@@ -276,6 +276,18 @@ const GameRoom = () => {
     }
   }
 
+  // Vérifier si une carte respecte ses conditions (simplifié côté frontend)
+  const checkCardConditions = (card) => {
+    // Pour l'instant, on accepte toutes les cartes
+    // La vérification complète se fait côté backend
+    // On peut ajouter des vérifications simples ici si nécessaire
+    if (!card.conditions) return true
+    
+    // Vérifications basiques côté frontend (optionnel)
+    // La vérification complète se fait côté backend lors de l'action
+    return true
+  }
+
   // Filtrer les cartes jouables selon l'action sélectionnée
   const getPlayableCards = () => {
     if (!selectedAction || !myPlayerState?.hand) return []
@@ -289,7 +301,7 @@ const GameRoom = () => {
         if (card.type === 'technology') {
           const levelRequired = card.cost || card.level || 0
           // Le niveau requis doit être <= puissance du Ranger Bleu
-          const isPlayable = levelRequired <= power
+          const isPlayable = levelRequired <= power && checkCardConditions(card)
           console.log(`[DEBUG] Carte ${card.name} (type: ${card.type}): niveau requis=${levelRequired}, Ranger Bleu niveau=${power}, jouable=${isPlayable}`)
           return isPlayable
         }
@@ -302,12 +314,16 @@ const GameRoom = () => {
 
     // Noir (Animaux) : peut jouer des cartes Troupe
     if (color === 'black') {
-      return myPlayerState.hand.filter(card => card.type === 'troupe')
+      return myPlayerState.hand.filter(card => 
+        card.type === 'troupe' && checkCardConditions(card)
+      )
     }
 
     // Vert (Association) : peut jouer des cartes Quête
     if (color === 'green') {
-      return myPlayerState.hand.filter(card => card.type === 'quete')
+      return myPlayerState.hand.filter(card => 
+        card.type === 'quete' && checkCardConditions(card)
+      )
     }
 
     // Orange, Jaune : pas de cartes à jouer

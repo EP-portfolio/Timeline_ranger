@@ -243,6 +243,18 @@ async def play_color_action(
                     detail=f"Niveau requis ({level_required}) supérieur au niveau du Ranger Bleu ({action.power})",
                 )
             
+            # Vérifier les conditions de la carte
+            conditions_valid, conditions_error = GameLogic.check_card_conditions(
+                card=selected_card,
+                player_state=player_state,
+                game_state=game_state,
+            )
+            if not conditions_valid:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Conditions non remplies : {conditions_error}",
+                )
+            
             # Retirer la carte de la main (les technologies ne coûtent pas d'or)
             player_state["hand"] = [
                 card
