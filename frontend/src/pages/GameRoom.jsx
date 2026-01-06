@@ -1202,6 +1202,42 @@ function HexGrid({ hexagons, garnisons, weapons, tokens, specialZones, selectedA
     return null
   }
 
+  // Calculer la puissance totale d'une garnison (somme des points de dégâts de toutes les armes)
+  const getGarnisonPower = (garnison) => {
+    if (!garnison || !garnison.weapon_id) return 0
+    const weapon = weapons.find(w => w.id === garnison.weapon_id)
+    return weapon?.points_degats || 0
+  }
+
+  // Obtenir la couleur de puissance selon les points de dégâts
+  const getPowerColor = (damage) => {
+    if (damage === 0) return '#6b7280' // Gris si pas d'arme
+    if (damage <= 1) return '#f59e0b' // Orange faible
+    if (damage <= 2) return '#ef4444' // Rouge moyen
+    return '#dc2626' // Rouge intense pour fort
+  }
+
+  // Obtenir l'intensité de la lueur selon la puissance
+  const getGlowIntensity = (damage) => {
+    if (damage === 0) return 0
+    return Math.min(0.3 + (damage * 0.15), 0.8) // Entre 0.3 et 0.8
+  }
+
+  // Calculer le centre d'une garnison pour afficher le badge
+  const getGarnisonCenter = (garnison) => {
+    if (!garnison || !garnison.hexagons || garnison.hexagons.length === 0) return null
+    let sumX = 0, sumY = 0
+    garnison.hexagons.forEach(hex => {
+      const pos = hexToPixel(hex.q, hex.r)
+      sumX += pos.x
+      sumY += pos.y
+    })
+    return {
+      x: sumX / garnison.hexagons.length,
+      y: sumY / garnison.hexagons.length
+    }
+  }
+
   return (
     <div className="hex-grid-wrapper">
       <svg
@@ -1244,24 +1280,64 @@ function HexGrid({ hexagons, garnisons, weapons, tokens, specialZones, selectedA
                 }}
               />
               {garnison && (
-                <circle
-                  cx={x}
-                  cy={y}
-                  r={hexSize * 0.6}
-                  fill="#10b981"
-                  opacity={0.3}
-                  className="garnison-marker"
-                />
+                <>
+                  {/* Lueur autour de la garnison si occupée */}
+                  {garnison.weapon_id && (
+                    <circle
+                      cx={x}
+                      cy={y}
+                      r={hexSize * 0.8}
+                      fill={getPowerColor(getGarnisonPower(garnison))}
+                      opacity={getGlowIntensity(getGarnisonPower(garnison))}
+                      className="garnison-glow"
+                      style={{
+                        filter: 'blur(8px)',
+                        animation: 'pulse-glow 2s ease-in-out infinite'
+                      }}
+                    />
+                  )}
+                  {/* Marqueur de garnison */}
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={hexSize * 0.6}
+                    fill={garnison.weapon_id ? "#10b981" : "#6b7280"}
+                    opacity={garnison.weapon_id ? 0.5 : 0.3}
+                    className="garnison-marker"
+                  />
+                </>
               )}
               {weapon && (
-                <circle
-                  cx={x}
-                  cy={y}
-                  r={hexSize * 0.4}
-                  fill="#1f2937"
-                  opacity={0.7}
-                  className="weapon-marker"
-                />
+                <>
+                  {/* Cercle de l'arme avec couleur selon puissance */}
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={hexSize * 0.4}
+                    fill={getPowerColor(weapon.points_degats || 0)}
+                    opacity={0.9}
+                    className="weapon-marker"
+                    style={{
+                      filter: `drop-shadow(0 0 ${(weapon.points_degats || 0) * 2}px ${getPowerColor(weapon.points_degats || 0)})`
+                    }}
+                  />
+                  {/* Badge avec points de dégâts */}
+                  <text
+                    x={x}
+                    y={y + 5}
+                    fontSize="11"
+                    fill="#fff"
+                    fontWeight="bold"
+                    textAnchor="middle"
+                    className="weapon-damage-badge"
+                    style={{
+                      textShadow: '0 0 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.5)',
+                      pointerEvents: 'none'
+                    }}
+                  >
+                    {weapon.points_degats || 0}
+                  </text>
+                </>
               )}
               {/* Afficher les coordonnées pour debug (seulement quelques hexagones) */}
               {hex.q < 3 && hex.r < 2 && (
