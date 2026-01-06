@@ -776,17 +776,61 @@ function getCardColorByType(cardType) {
 
 // Composant pour afficher tous les détails d'une carte
 function CardDetail({ card }) {
+  const cardBackgroundColor = getCardColorByType(card.type)
+  const textColor = getContrastColor(cardBackgroundColor)
+
   return (
-    <>
-      <div className="card-header">
-        <div className="card-name">{card.name}</div>
-        <div className="card-type">{card.type}</div>
-        {card.is_factice && (
-          <div className="card-factice-badge">⚠️ CARTE FACTICE</div>
+    <div className="ark-nova-card">
+      {/* Badge factice */}
+      {card.is_factice && (
+        <div className="card-factice-badge">⚠️ CARTE FACTICE</div>
+      )}
+      
+      {/* Zone d'illustration (vide pour l'instant) */}
+      <div className="card-illustration">
+        {/* Zone vide pour illustration future */}
+      </div>
+      
+      {/* Icônes en haut à gauche */}
+      <div className="card-top-left-icons">
+        {/* Hexagone avec taille/coût */}
+        <div className="card-icon-hexagon">
+          {card.size !== undefined && card.size !== null ? card.size : (card.cost || 0)}
+        </div>
+        {/* Rectangle avec numéro de carte */}
+        <div className="card-icon-rectangle">
+          {card.card_number || '?'}
+        </div>
+      </div>
+      
+      {/* Icônes en haut à droite */}
+      <div className="card-top-right-icons">
+        {/* Icônes circulaires pour types/continents */}
+        {card.weapon_type && (
+          <div className="card-icon-circle card-icon-weapon" title={card.weapon_type_name || card.weapon_type}>
+            ⚔️
+          </div>
+        )}
+        {card.armor_piece_type && (
+          <div className="card-icon-circle card-icon-armor" title={card.armor_piece_type}>
+            🛡️
+          </div>
+        )}
+        {card.quest_type && (
+          <div className="card-icon-circle card-icon-quest" title={card.quest_type}>
+            📜
+          </div>
         )}
       </div>
       
-      <div className="card-body">
+      {/* Bande orange avec nom */}
+      <div className="card-orange-band">
+        <div className="card-name-main">{card.name}</div>
+        <div className="card-name-subtitle">{card.type.toUpperCase()}</div>
+      </div>
+      
+      {/* Section blanche avec mécaniques */}
+      <div className="card-white-section">
         {/* Coût ou Niveau requis selon le type de carte */}
         {card.type === 'technology' && card.cost !== undefined && card.cost !== null && (
           <div className="card-section">
@@ -1007,7 +1051,12 @@ function CardDetail({ card }) {
           )}
         </div>
       </div>
-    </>
+      
+      {/* Onglet marron en bas */}
+      <div className="card-bottom-tab">
+        {card.card_number || '?'}
+      </div>
+    </div>
   )
 }
 

@@ -526,6 +526,168 @@
   margin-bottom: 1.5rem;
 }
 
+/* Design inspiré d'Ark Nova */
+.ark-nova-card {
+  background: #1a1a1a;
+  width: 200px;
+  min-height: 350px;
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 2px solid #444;
+}
+
+.ark-nova-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+  border-color: #667eea;
+}
+
+.ark-nova-card.selected {
+  border-color: #10b981 !important;
+  border-width: 3px;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+  transform: scale(1.05);
+}
+
+/* Zone d'illustration (vide pour l'instant) */
+.card-illustration {
+  width: 100%;
+  height: 120px;
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+  position: relative;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-illustration::after {
+  content: "🖼️";
+  font-size: 2rem;
+  opacity: 0.3;
+  color: #666;
+}
+
+/* Icônes en haut à gauche */
+.card-top-left-icons {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 5;
+}
+
+.card-icon-hexagon {
+  width: 32px;
+  height: 32px;
+  background: #666;
+  color: #000;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  clip-path: polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%);
+  border: 1px solid #333;
+}
+
+.card-icon-rectangle {
+  width: 32px;
+  height: 24px;
+  background: #666;
+  color: #000;
+  font-weight: 700;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  border: 1px solid #333;
+}
+
+/* Icônes en haut à droite */
+.card-top-right-icons {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  z-index: 5;
+}
+
+.card-icon-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.card-icon-weapon {
+  background: rgba(239, 68, 68, 0.7);
+}
+
+.card-icon-armor {
+  background: rgba(59, 130, 246, 0.7);
+}
+
+.card-icon-quest {
+  background: rgba(16, 185, 129, 0.7);
+}
+
+/* Bande orange avec nom */
+.card-orange-band {
+  background: #ff6b35;
+  padding: 0.75rem 0.5rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.card-name-main {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.card-name-subtitle {
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 500;
+  opacity: 0.9;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Section blanche avec mécaniques */
+.card-white-section {
+  background: #ffffff;
+  flex: 1;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 150px;
+}
+
+/* Ancien style pour compatibilité */
 .card-item {
   background: #0a0a0a;
   padding: 1rem;
@@ -557,28 +719,48 @@
   transform: scale(1.05);
 }
 
+/* Onglet marron en bas */
+.card-bottom-tab {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 20px;
+  background: #d4a574;
+  color: #000;
+  font-weight: 700;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border: 1px solid #b8956a;
+  z-index: 3;
+}
+
+/* Styles pour le contenu dans la section blanche */
 .card-header {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   padding-bottom: 0.5rem;
   margin-bottom: 0.75rem;
 }
 
 .card-name {
-  color: #ffffff;
+  color: #000000;
   font-weight: 700;
   font-size: 1.1rem;
   margin-bottom: 0.25rem;
   line-height: 1.2;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .card-type {
-  color: #e0e0e0;
+  color: #333333;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 600;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .card-factice-badge {
@@ -603,6 +785,7 @@
   flex-direction: column;
   gap: 0.5rem;
   font-size: 0.85rem;
+  color: #000000;
 }
 
 .card-section {
@@ -610,23 +793,21 @@
 }
 
 .card-section-title {
-  color: #c0c0c0;
+  color: #333333;
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 0.25rem;
   font-weight: 700;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .card-cost {
-  color: #ffd700;
+  color: #b8860b;
   font-size: 0.9rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .card-cost::before {
@@ -635,10 +816,9 @@
 }
 
 .card-size {
-  color: #60a5fa;
+  color: #1e40af;
   font-size: 0.85rem;
   font-weight: 600;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .card-stats {
@@ -656,16 +836,14 @@
 }
 
 .card-stat-label {
-  color: #d0d0d0;
+  color: #333333;
   min-width: 80px;
   font-weight: 500;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .card-stat-value {
-  color: #ffffff;
+  color: #000000;
   font-weight: 700;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .stat-damage { color: #ef4444; }
@@ -682,9 +860,8 @@
 
 .card-material-item {
   font-size: 0.75rem;
-  color: #d0d0d0;
+  color: #333333;
   margin-bottom: 0.25rem;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .card-effects {
@@ -695,27 +872,25 @@
 
 .card-effect {
   font-size: 0.75rem;
-  color: #e0e0e0;
+  color: #000000;
   margin-bottom: 0.5rem;
   padding: 0.25rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.05);
   border-radius: 4px;
-  border-left: 2px solid rgba(255, 255, 255, 0.3);
+  border-left: 2px solid rgba(0, 0, 0, 0.2);
 }
 
 .card-effect-title {
   font-weight: 700;
-  color: #ffffff;
+  color: #000000;
   margin-bottom: 0.15rem;
   font-size: 0.7rem;
   text-transform: uppercase;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .card-effect-text {
-  color: #d0d0d0;
+  color: #333333;
   line-height: 1.3;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .card-conditions {
@@ -726,22 +901,16 @@
 
 .card-condition-item {
   font-size: 0.75rem;
-  color: #ffd700;
+  color: #b8860b;
   margin-bottom: 0.25rem;
   font-weight: 600;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .card-level {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.7rem;
-  font-weight: 700;
+  color: #1e40af;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
 .no-playable-cards {
@@ -767,7 +936,7 @@
 }
 
 .card-level-required {
-  color: #93c5fd;
+  color: #1e40af;
   font-size: 0.95rem;
   font-weight: 700;
   display: flex;
@@ -775,10 +944,9 @@
   gap: 0.25rem;
   margin-bottom: 0.5rem;
   padding: 0.5rem;
-  background: rgba(59, 130, 246, 0.2);
+  background: rgba(59, 130, 246, 0.15);
   border-radius: 6px;
-  border-left: 3px solid #60a5fa;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  border-left: 3px solid #3b82f6;
 }
 
 .confirm-hand-button {
