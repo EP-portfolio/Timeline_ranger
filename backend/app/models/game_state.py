@@ -3,6 +3,8 @@ Modèle pour gérer l'état des parties dans la base de données
 """
 from typing import Optional, Dict, Any
 import json
+from datetime import datetime
+from decimal import Decimal
 from app.core.database import Database
 
 
@@ -13,9 +15,19 @@ class GameStateModel:
     def create(game_id: int, state_data: Dict[str, Any], turn_number: int = 0, current_player: Optional[int] = None) -> dict:
         """Crée un nouvel état de partie."""
         try:
+            # Fonction helper pour sérialiser les types non-JSON
+            def json_serializer(obj):
+                """Sérialise les objets non-JSON en string."""
+                if isinstance(obj, (datetime,)):
+                    return obj.isoformat()
+                elif isinstance(obj, (Decimal,)):
+                    return float(obj)
+                elif hasattr(obj, '__dict__'):
+                    return str(obj)
+                raise TypeError(f"Type {type(obj)} non sérialisable")
+            
             # S'assurer que state_data est sérialisable en JSON
-            # Utiliser ensure_ascii=False et default=str pour gérer tous les cas
-            json_str = json.dumps(state_data, default=str, ensure_ascii=False)
+            json_str = json.dumps(state_data, default=json_serializer, ensure_ascii=False)
             print(f"[DEBUG] Sérialisation JSON réussie pour game_id {game_id}, taille: {len(json_str)} bytes")
         except (TypeError, ValueError) as e:
             import traceback

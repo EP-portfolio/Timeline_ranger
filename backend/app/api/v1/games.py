@@ -159,6 +159,7 @@ async def start_game(game_id: int, current_user: dict = Depends(get_current_user
     from app.services.game_logic import GameLogic
     from app.models.game_state import GameStateModel
     import traceback
+    from decimal import Decimal
 
     try:
         players = GamePlayerModel.list_by_game(game_id)
@@ -168,14 +169,26 @@ async def start_game(game_id: int, current_user: dict = Depends(get_current_user
                 detail="Aucun joueur trouvé dans la partie",
             )
 
-        # Debug: vérifier la structure des joueurs
-        print(f"[DEBUG] Nombre de joueurs: {len(players)}")
+        # Normaliser les données des joueurs (convertir Decimal en int, datetime en string)
+        normalized_players = []
         for p in players:
-            print(f"[DEBUG] Joueur: {p}")
-            if "player_number" not in p:
-                raise ValueError(f"Joueur sans player_number: {p}")
+            normalized_player = {
+                "id": int(p["id"]),
+                "user_id": int(p["user_id"]),
+                "player_number": int(p["player_number"]) if isinstance(p["player_number"], (int, Decimal)) else p["player_number"],
+                "armure_meca_id": int(p["armure_meca_id"]) if p.get("armure_meca_id") else None,
+            }
+            # Vérifier que player_number est valide
+            if normalized_player["player_number"] is None:
+                raise ValueError(f"Joueur sans player_number valide: {p}")
+            normalized_players.append(normalized_player)
 
-        game_state = GameLogic.initialize_game(game_id, players)
+        print(f"[DEBUG] Nombre de joueurs normalisés: {len(normalized_players)}")
+        for p in normalized_players:
+            print(f"[DEBUG] Joueur normalisé: {p}")
+
+        # Initialiser l'état du jeu avec les joueurs normalisés
+        game_state = GameLogic.initialize_game(game_id, normalized_players)
         print(f"[DEBUG] État du jeu initialisé avec succès")
 
         # Sauvegarder l'état initial AVANT de mettre à jour le statut
@@ -188,7 +201,7 @@ async def start_game(game_id: int, current_user: dict = Depends(get_current_user
             current_player=game_state["current_player"],
         )
         print(f"[DEBUG] État sauvegardé: {saved_state is not None}")
-        
+
         if saved_state is None:
             raise ValueError("Échec de la sauvegarde de l'état du jeu")
 
@@ -196,13 +209,17 @@ async def start_game(game_id: int, current_user: dict = Depends(get_current_user
         print(f"[DEBUG] Mise à jour du statut de la partie {game_id} à 'started'")
         GameModel.update_status(game_id, "started")
         print(f"[DEBUG] Statut mis à jour avec succès")
-        
+
         # Vérifier que l'état est bien récupérable
         verification_state = GameStateModel.get_latest(game_id)
         if verification_state:
-            print(f"[DEBUG] Vérification: État récupérable depuis DB, status: {verification_state.get('state_data', {}).get('status')}")
+            print(
+                f"[DEBUG] Vérification: État récupérable depuis DB, status: {verification_state.get('state_data', {}).get('status')}"
+            )
         else:
-            print(f"[WARN] Vérification: Impossible de récupérer l'état juste après sauvegarde")
+            print(
+                f"[WARN] Vérification: Impossible de récupérer l'état juste après sauvegarde"
+            )
 
         # Ne pas retourner game_state complet pour éviter les réponses trop volumineuses
         # Le frontend récupérera l'état via /state
@@ -211,6 +228,8 @@ async def start_game(game_id: int, current_user: dict = Depends(get_current_user
             "game_id": game_id,
             "status": "started",
         }
+    except HTTPException:
+        raise
     except Exception as e:
         import traceback
 

@@ -496,30 +496,29 @@ class GameLogic:
 
         Args:
             game_id: ID de la partie
-            players: Liste des joueurs avec leurs informations
+            players: Liste des joueurs avec leurs informations (normalisés)
 
         Returns:
             État initial du jeu
         """
-        # Distribuer les cartes initiales (8 cartes, garder 4)
-        # Chaque joueur reçoit 8 cartes et doit en garder 4
-
         # Initialiser les Rangers (5 cartes Action) pour chaque joueur
-        # Les Rangers sont déjà initialisés avec les positions 1-5
         rangers = GameLogic.initialize_rangers()
 
         # Initialiser l'état pour chaque joueur
         players_state = {}
         for player in players:
+            # S'assurer que player_number est un int
+            player_number = int(player["player_number"])
+            
             # Générer 8 cartes initiales pour chaque joueur
             initial_cards = GameLogic.generate_initial_cards(8)
 
-            players_state[player["player_number"]] = {
-                "player_id": player["id"],
-                "user_id": player["user_id"],
-                "player_number": player["player_number"],
-                "armure_meca_id": player.get("armure_meca_id"),
-                "rangers": rangers.copy(),
+            players_state[player_number] = {
+                "player_id": int(player["id"]),
+                "user_id": int(player["user_id"]),
+                "player_number": player_number,
+                "armure_meca_id": int(player["armure_meca_id"]) if player.get("armure_meca_id") else None,
+                "rangers": [r.copy() for r in rangers],  # Deep copy des Rangers
                 "initial_hand": initial_cards,  # 8 cartes initiales à sélectionner
                 "hand": [],  # Cartes en main après sélection (4 cartes)
                 "hand_selected": False,  # Indique si le joueur a sélectionné ses 4 cartes
@@ -539,40 +538,38 @@ class GameLogic:
                 },
                 "board": {
                     # Grille hexagonale de base de l'armure méca
-                    # 9 colonnes contenant chacune 6 ou 7 emplacements
-                    # Les cases rocher et eau sont inconstructibles
                     "grid": GameLogic.initialize_board_grid(),
-                    "garnisons": [],  # Parties d'armure construites (constructions) - Tuiles hexagonales
-                    "weapon_slots": [],  # Slots pour armes
-                    "weapons": [],  # Armes installées (troupes)
-                    "armor_pieces": [],  # Pièces d'armure (technologies)
-                    "lasers": [],  # Lasers installés
-                    "tokens": [],  # Jetons placés sur le plateau (ressources, points, etc.)
-                    "special_zones": [],  # Zones spéciales (mines, etc.)
+                    "garnisons": [],
+                    "weapon_slots": [],
+                    "weapons": [],
+                    "armor_pieces": [],
+                    "lasers": [],
+                    "tokens": [],
+                    "special_zones": [],
                 },
-                "emissaires": 1,  # Émissaires disponibles
-                "x_tokens": 0,  # Jetons X (croix)
-                "last_breath_cards": [],  # Cartes Dernier Souffle (2 au début)
-                "mines": [],  # Mines acquises (vibranium, titanium, etc.)
-                "can_improve_ranger": False,  # Peut améliorer un Ranger (après 2ème mine)
-                "improve_ranger_pending": False,  # Amélioration de Ranger en attente
-                "construction_turn_data": {  # Données pour le tour de construction
-                    "action_power": None,  # Niveau de l'action Construction jouée
-                    "constructions_placed": [],  # Liste des tailles des tuiles construites dans ce tour
-                    "total_size_used": 0,  # Total des tailles utilisées
-                    "is_improved": False,  # Ranger amélioré ou non
+                "emissaires": 1,
+                "x_tokens": 0,
+                "last_breath_cards": [],
+                "mines": [],
+                "can_improve_ranger": False,
+                "improve_ranger_pending": False,
+                "construction_turn_data": {
+                    "action_power": None,
+                    "constructions_placed": [],
+                    "total_size_used": 0,
+                    "is_improved": False,
                 },
             }
 
         # Déterminer l'ordre de jeu initial (aléatoire)
-        player_numbers = [p["player_number"] for p in players]
+        player_numbers = [int(p["player_number"]) for p in players]
         random.shuffle(player_numbers)
 
         game_state = {
-            "game_id": game_id,
+            "game_id": int(game_id),
             "status": "started",
             "turn_number": 1,
-            "current_player": player_numbers[0],  # Premier joueur
+            "current_player": player_numbers[0] if player_numbers else None,
             "player_order": player_numbers,
             "players": players_state,
             "created_at": datetime.now().isoformat(),
