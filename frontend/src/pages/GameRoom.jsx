@@ -210,6 +210,52 @@ const GameRoom = () => {
   const handleCancelAction = () => {
     setSelectedAction(null)
     setSelectedCardFromHand(null)
+    setSelectedTile(null)
+    setTileRotation(0)
+    setPreviewPosition(null)
+  }
+
+  const handleSelectTile = (tile) => {
+    setSelectedTile(tile)
+    setTileRotation(0)
+    setPreviewPosition(null)
+  }
+
+  const handleRotateTile = (direction) => {
+    setTileRotation(prev => {
+      const newRotation = prev + direction
+      // Limiter la rotation entre -5 et 5 (équivalent à -300° et +300°)
+      if (newRotation < -5) return -5
+      if (newRotation > 5) return 5
+      return newRotation
+    })
+  }
+
+  const handlePlaceConstruction = async () => {
+    if (!selectedAction || !selectedTile || !previewPosition) {
+      alert('Veuillez sélectionner une tuile et un emplacement')
+      return
+    }
+
+    try {
+      await actionsAPI.placeConstruction(id, {
+        tile_id: selectedTile.id,
+        anchor_q: previewPosition.q,
+        anchor_r: previewPosition.r,
+        rotation: tileRotation,
+        finish_construction_turn: false, // Le joueur peut continuer si le Ranger est amélioré
+      })
+
+      // Réinitialiser après placement
+      setSelectedTile(null)
+      setTileRotation(0)
+      setPreviewPosition(null)
+      // Ne pas réinitialiser selectedAction si le Ranger est amélioré et peut continuer
+      // L'état sera mis à jour via WebSocket
+    } catch (error) {
+      console.error('Erreur placement construction:', error)
+      alert(error.response?.data?.detail || 'Erreur lors du placement de la construction')
+    }
   }
 
   // Filtrer les cartes jouables selon l'action sélectionnée
@@ -343,6 +389,9 @@ const GameRoom = () => {
                     weapons={myPlayerState.board.weapons || []}
                     tokens={myPlayerState.board.tokens || []}
                     specialZones={myPlayerState.board.special_zones || []}
+                    selectedAction={selectedAction}
+                    selectedTile={selectedTile}
+                    setPreviewPosition={setPreviewPosition}
                   />
                 ) : (
                   <div className="map-armor-placeholder">
@@ -681,7 +730,7 @@ function getCardColorByType(cardType) {
 }
 
 // Composant pour afficher la grille hexagonale
-function HexGrid({ hexagons, garnisons, weapons, tokens, specialZones }) {
+function HexGrid({ hexagons, garnisons, weapons, tokens, specialZones, selectedAction, selectedTile, setPreviewPosition }) {
   // Calculer les positions des hexagones pour l'affichage
   const hexSize = 30 // Taille d'un hexagone en pixels
   const hexWidth = hexSize * 2
