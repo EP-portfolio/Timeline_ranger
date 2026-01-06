@@ -712,6 +712,20 @@
   font-weight: 700;
 }
 
+.card-level-required {
+  color: #3b82f6;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+}
+
 .confirm-hand-button {
   width: 100%;
   padding: 1rem;

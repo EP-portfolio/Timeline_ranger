@@ -262,12 +262,19 @@ const GameRoom = () => {
   const getPlayableCards = () => {
     if (!selectedAction || !myPlayerState?.hand) return []
 
-    const { color } = selectedAction
+    const { color, power } = selectedAction
 
-    // Bleu (Mécène) : peut jouer des cartes Mécène ou gagner des crédits
-    // Pour le POC, on considère toutes les cartes comme jouables avec bleu
+    // Bleu (Mécène) : peut jouer des cartes Technologie dont le niveau requis (cost) <= puissance du Ranger
     if (color === 'blue') {
-      return myPlayerState.hand
+      return myPlayerState.hand.filter(card => {
+        // Pour les technologies, le "cost" représente le niveau requis
+        if (card.type === 'technology') {
+          const levelRequired = card.cost || card.level || 0
+          return levelRequired <= power
+        }
+        // Les autres types de cartes ne sont pas jouables avec l'action Bleue
+        return false
+      })
     }
 
     // Noir (Animaux) : peut jouer des cartes Troupe
@@ -275,7 +282,12 @@ const GameRoom = () => {
       return myPlayerState.hand.filter(card => card.type === 'troupe')
     }
 
-    // Orange, Vert, Jaune : pas de cartes à jouer pour l'instant
+    // Vert (Association) : peut jouer des cartes Quête
+    if (color === 'green') {
+      return myPlayerState.hand.filter(card => card.type === 'quete')
+    }
+
+    // Orange, Jaune : pas de cartes à jouer
     return []
   }
 
@@ -730,14 +742,20 @@ function CardDetail({ card }) {
       </div>
       
       <div className="card-body">
-        {/* Coût */}
-        {card.cost !== undefined && card.cost !== null && (
+        {/* Coût ou Niveau requis selon le type de carte */}
+        {card.type === 'technology' && card.cost !== undefined && card.cost !== null && (
+          <div className="card-section">
+            <div className="card-level-required">🔵 Niveau requis: {card.cost}</div>
+          </div>
+        )}
+        
+        {card.type !== 'technology' && card.cost !== undefined && card.cost !== null && (
           <div className="card-section">
             <div className="card-cost">{card.cost} PO</div>
           </div>
         )}
 
-        {/* Niveau (pour technologies) */}
+        {/* Niveau (pour technologies - affiché en badge) */}
         {card.level && (
           <div className="card-level">Niveau {card.level}</div>
         )}

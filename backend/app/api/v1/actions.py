@@ -101,13 +101,17 @@ def get_game_state(game_id: int) -> Dict[str, Any]:
 
     # Essayer de récupérer l'état depuis la base de données
     saved_state = GameStateModel.get_latest(game_id)
-    print(f"[DEBUG] get_game_state pour game_id {game_id}: saved_state trouvé = {saved_state is not None}")
+    print(
+        f"[DEBUG] get_game_state pour game_id {game_id}: saved_state trouvé = {saved_state is not None}"
+    )
 
     if saved_state and saved_state.get("state_data"):
         # Normaliser les clés de players (convertir strings en int si nécessaire)
         state = saved_state["state_data"]
-        print(f"[DEBUG] État récupéré depuis DB, status: {state.get('status')}, turn: {state.get('turn_number')}")
-        
+        print(
+            f"[DEBUG] État récupéré depuis DB, status: {state.get('status')}, turn: {state.get('turn_number')}"
+        )
+
         if "players" in state and state["players"]:
             # Vérifier si les clés sont des strings et les convertir en int
             if len(state["players"]) > 0:
@@ -122,9 +126,13 @@ def get_game_state(game_id: int) -> Dict[str, Any]:
 
     # Si aucun état n'existe mais la partie est démarrée, initialiser
     # (peut arriver si l'état n'a pas été sauvegardé correctement)
-    print(f"[DEBUG] Aucun état sauvegardé trouvé, initialisation pour game_id {game_id}")
+    print(
+        f"[DEBUG] Aucun état sauvegardé trouvé, initialisation pour game_id {game_id}"
+    )
     state = GameLogic.initialize_game(game_id, players)
-    print(f"[DEBUG] État initialisé, status: {state.get('status')}, turn: {state.get('turn_number')}")
+    print(
+        f"[DEBUG] État initialisé, status: {state.get('status')}, turn: {state.get('turn_number')}"
+    )
 
     # Sauvegarder l'état initial
     try:
@@ -207,14 +215,41 @@ async def play_color_action(
     if action.color == ColorAction.BLUE:
         # Action Mécène
         if action.selected_card_id:
-            # Jouer une carte Mécène
-            # Retirer la carte de la main
+            # Trouver la carte sélectionnée
+            selected_card = None
+            for card in player_state.get("hand", []):
+                if card["id"] == action.selected_card_id:
+                    selected_card = card
+                    break
+            
+            if not selected_card:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Carte non trouvée dans votre main",
+                )
+            
+            # Vérifier que c'est une carte Technologie
+            if selected_card.get("type") != "technology":
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="L'action Mécène nécessite une carte Technologie",
+                )
+            
+            # Vérifier le niveau requis (cost = niveau requis pour les technologies)
+            level_required = selected_card.get("cost") or selected_card.get("level", 0)
+            if level_required > action.power:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Niveau requis ({level_required}) supérieur au niveau du Ranger Bleu ({action.power})",
+                )
+            
+            # Retirer la carte de la main (les technologies ne coûtent pas d'or)
             player_state["hand"] = [
                 card
                 for card in player_state.get("hand", [])
                 if card["id"] != action.selected_card_id
             ]
-            # TODO: Appliquer les effets de la carte Mécène
+            # TODO: Appliquer les effets de la carte Technologie (placer sur le plateau, etc.)
         elif action.action_data and "gain_credits" in action.action_data:
             # Gagner des crédits (pas de carte)
             player_state["resources"]["or"] += action.action_data["gain_credits"]
