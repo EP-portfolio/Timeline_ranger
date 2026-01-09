@@ -1189,13 +1189,13 @@ function HexGrid({ hexagons, garnisons, weapons, tokens, specialZones, selectedA
     return { x: offsetX + 50, y: offsetY + 50 } // Offset pour centrer
   }
 
-  // Obtenir le terrain d'un hexagone
+  // Obtenir le terrain d'un hexagone (thème cyberpunk)
   const getTerrainColor = (terrain, constructible) => {
     if (!constructible) {
-      if (terrain === 'water') return '#3b82f6' // Bleu pour l'eau
-      if (terrain === 'rock') return '#6b7280' // Gris pour les rochers
+      if (terrain === 'water') return '#00d9ff' // Cyan holographique pour l'eau
+      if (terrain === 'rock') return '#1a1a2e' // Noir-violet foncé pour les rochers
     }
-    return '#92400e' // Marron pour la terre craquelée (constructible)
+    return '#0a0e27' // Bleu nuit profond pour le terrain constructible
   }
 
   // Vérifier si un hexagone a une garnison
@@ -1221,12 +1221,12 @@ function HexGrid({ hexagons, garnisons, weapons, tokens, specialZones, selectedA
     return weapon?.points_degats || 0
   }
 
-  // Obtenir la couleur de puissance selon les points de dégâts
+  // Obtenir la couleur de puissance selon les points de dégâts (thème cyberpunk)
   const getPowerColor = (damage) => {
-    if (damage === 0) return '#6b7280' // Gris si pas d'arme
-    if (damage <= 1) return '#f59e0b' // Orange faible
-    if (damage <= 2) return '#ef4444' // Rouge moyen
-    return '#dc2626' // Rouge intense pour fort
+    if (damage === 0) return '#1a1a2e' // Noir-violet si pas d'arme
+    if (damage <= 1) return '#00d9ff' // Cyan faible
+    if (damage <= 2) return '#7b2cbf' // Violet moyen
+    return '#ff006e' // Rose électrique pour fort
   }
 
   // Obtenir l'intensité de la lueur selon la puissance
@@ -1281,9 +1281,9 @@ function HexGrid({ hexagons, garnisons, weapons, tokens, specialZones, selectedA
               <polygon
                 points={points.join(' ')}
                 fill={terrainColor}
-                stroke={hex.constructible ? '#666' : '#444'}
-                strokeWidth={1}
-                opacity={hex.constructible ? 0.8 : 0.5}
+                stroke={hex.constructible ? '#00d9ff' : '#1a1a2e'}
+                strokeWidth={hex.constructible ? 1.5 : 0.8}
+                opacity={hex.constructible ? 0.9 : 0.6}
                 className="hex-cell"
                 onClick={() => {
                   // Si on est en mode placement de tuile, définir la position de prévisualisation
@@ -1293,6 +1293,7 @@ function HexGrid({ hexagons, garnisons, weapons, tokens, specialZones, selectedA
                 }}
                 style={{
                   cursor: selectedAction?.color === 'orange' && selectedTile ? 'pointer' : 'default',
+                  filter: hex.constructible ? 'drop-shadow(0 0 2px rgba(0, 217, 255, 0.3))' : 'none'
                 }}
               />
               {garnison && (
@@ -1317,9 +1318,12 @@ function HexGrid({ hexagons, garnisons, weapons, tokens, specialZones, selectedA
                     cx={x}
                     cy={y}
                     r={hexSize * 0.6}
-                    fill={garnison.weapon_id ? "#10b981" : "#6b7280"}
-                    opacity={garnison.weapon_id ? 0.5 : 0.3}
+                    fill={garnison.weapon_id ? "#7b2cbf" : "#1a1a2e"}
+                    opacity={garnison.weapon_id ? 0.6 : 0.4}
                     className="garnison-marker"
+                    style={{
+                      filter: garnison.weapon_id ? 'drop-shadow(0 0 6px rgba(123, 44, 191, 0.8))' : 'none'
+                    }}
                   />
                 </>
               )}
