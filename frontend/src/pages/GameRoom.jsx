@@ -1175,19 +1175,39 @@ function CardDetail({ card }) {
 // Composant pour afficher la grille hexagonale
 function HexGrid({ hexagons, garnisons, weapons, tokens, specialZones, selectedAction, selectedTile, setPreviewPosition }) {
   // Calculer les positions des hexagones pour l'affichage
-  const hexSize = 30 // Taille d'un hexagone en pixels
+  const hexSize = 28 // Rayon d'un hexagone en pixels
   const hexWidth = hexSize * 2
   const hexHeight = Math.sqrt(3) * hexSize
 
   // Fonction pour convertir coordonnées hexagonales (q, r) en coordonnées pixel
-  // Structure : 9 colonnes verticales (q = 0-8), chaque colonne a 6 ou 7 hexagones
+  // Structure : Grille hexagonale flat-top (côté plat en haut) avec colonnes décalées
   const hexToPixel = (q, r) => {
-    // Pour une grille hexagonale en colonnes verticales
-    // Les colonnes impaires sont décalées
-    const offsetX = hexSize * Math.sqrt(3) * q
-    const offsetY = hexSize * (1.5 * r + (q % 2) * 0.75) // Décalage pour colonnes paires/impaires
-    return { x: offsetX + 50, y: offsetY + 50 } // Offset pour centrer
+    // Pour des hexagones flat-top arrangés en colonnes
+    const offsetX = q * hexWidth * 0.75 // Distance horizontale entre centres
+    const offsetY = r * hexHeight + (q % 2) * (hexHeight / 2) // Décalage vertical pour colonnes impaires
+    return { x: offsetX, y: offsetY }
   }
+
+  // Calculer les dimensions de la grille pour le viewBox
+  const calculateGridBounds = () => {
+    if (!hexagons || hexagons.length === 0) {
+      return { minX: 0, minY: 0, maxX: 800, maxY: 600 }
+    }
+
+    const positions = hexagons.map(hex => hexToPixel(hex.q, hex.r))
+    const minX = Math.min(...positions.map(p => p.x)) - hexWidth
+    const maxX = Math.max(...positions.map(p => p.x)) + hexWidth
+    const minY = Math.min(...positions.map(p => p.y)) - hexHeight
+    const maxY = Math.max(...positions.map(p => p.y)) + hexHeight
+
+    return { minX, minY, maxX, maxY }
+  }
+
+  const bounds = calculateGridBounds()
+  const viewBoxWidth = bounds.maxX - bounds.minX + 80 // Marge de 40px de chaque côté
+  const viewBoxHeight = bounds.maxY - bounds.minY + 80
+  const viewBoxX = bounds.minX - 40
+  const viewBoxY = bounds.minY - 40
 
   // Obtenir le terrain d'un hexagone (thème cyberpunk)
   const getTerrainColor = (terrain, constructible) => {
@@ -1254,11 +1274,13 @@ function HexGrid({ hexagons, garnisons, weapons, tokens, specialZones, selectedA
     <div className="hex-grid-wrapper">
       <svg
         className="hex-grid-svg"
-        viewBox="0 0 800 600"
+        viewBox={`${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}`}
         preserveAspectRatio="xMidYMid meet"
         style={{
           display: 'block',
-          margin: '0 auto'
+          margin: '0 auto',
+          width: '100%',
+          height: '100%'
         }}
       >
         {hexagons.map((hex, index) => {
@@ -1359,19 +1381,7 @@ function HexGrid({ hexagons, garnisons, weapons, tokens, specialZones, selectedA
                   </text>
                 </>
               )}
-              {/* Afficher les coordonnées pour debug (seulement quelques hexagones) */}
-              {hex.q < 3 && hex.r < 2 && (
-                <text
-                  x={x}
-                  y={y + 4}
-                  fontSize="8"
-                  fill="#fff"
-                  textAnchor="middle"
-                  className="hex-coords"
-                >
-                  {hex.q},{hex.r}
-                </text>
-              )}
+              {/* Coordonnées de debug supprimées */}
             </g>
           )
         })}
